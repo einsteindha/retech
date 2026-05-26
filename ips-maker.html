@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나만의 투자 원칙서 (IPS) | 바른재무설계 정원준 CFP</title>
+<meta name="description" content="4주 강의 내용을 담은 나만의 IPS 투자 원칙서 작성 도우미">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #1E2761;
+    --orange: #E8834A;
+    --white:  #FFFFFF;
+    --bg:     #F4F7FF;
+    --card:   #FFFFFF;
+    --border: #DEE5F7;
+    --text1:  #1A1A2E;
+    --text2:  #5A6080;
+    --text3:  #9AA0BC;
+    --green:  #27AE60;
+    --red:    #C0392B;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:    #0F1220;
+      --card:  #1A1F35;
+      --border:#2D3555;
+      --text1: #E8EAF6;
+      --text2: #8892C0;
+      --text3: #555F8A;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+    background: var(--bg); color: var(--text1);
+    min-height: 100vh; padding: 0 0 60px;
+  }
+
+  .header {
+    background: var(--navy); color: #fff;
+    padding: 20px 24px 16px; text-align: center;
+  }
+  .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .header p  { font-size: 13px; opacity: .75; }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+
+  .step-bar {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .step-bar::-webkit-scrollbar { display: none; }
+  .step-btn {
+    flex-shrink: 0; padding: 8px 14px; font-size: 12px; font-weight: 500;
+    border-radius: 20px; border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text2); cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .step-btn.active {
+    background: var(--navy); border-color: var(--navy);
+    color: #fff;
+  }
+  .step-btn.done {
+    border-color: var(--navy); color: var(--navy);
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 17px; font-weight: 600; margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 13px; color: var(--text2); margin-bottom: 20px;
+  }
+
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--text2); margin-bottom: 6px; letter-spacing: .3px;
+  }
+  .field-hint {
+    font-size: 11px; color: var(--text3); margin-bottom: 6px;
+  }
+
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: 11px 13px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--card); color: var(--text1);
+    font-size: 15px; font-family: inherit;
+    outline: none; transition: border-color .15s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--navy);
+  }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239AA0BC' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .alloc-wrap { text-align: center; }
+  .alloc-wrap label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+  .alloc-wrap input { text-align: center; padding: 10px 4px; }
+  .alloc-wrap .unit { font-size: 13px; color: var(--text3); margin-top: 4px; }
+
+  .total-badge {
+    display: inline-block; padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; margin-top: 10px;
+  }
+  .badge-ok   { background: #D5F5E3; color: #1a6b3c; }
+  .badge-warn { background: #FEF9E7; color: #7d6608; }
+  .badge-err  { background: #FADBD8; color: #7b241c; }
+
+  .info-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 14px;
+  }
+
+  .order-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--card); margin-bottom: 8px;
+  }
+  .order-num {
+    min-width: 24px; height: 24px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .order-label { flex: 1; font-size: 14px; }
+  .order-input {
+    flex: 1; font-size: 14px; border: none; background: transparent;
+    outline: none; color: var(--text1); font-family: inherit;
+  }
+  .order-input::placeholder { color: var(--text3); }
+  .order-btns { display: flex; gap: 4px; }
+  .order-btns button {
+    width: 30px; height: 30px; border: 1.5px solid var(--border);
+    border-radius: 6px; background: var(--bg); color: var(--text2);
+    font-size: 14px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .order-btns button:disabled { opacity: .3; cursor: not-allowed; }
+
+  .rule-item {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+  }
+  .rule-num {
+    min-width: 26px; height: 26px; border-radius: 50%;
+    background: var(--navy); color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 5px;
+  }
+
+  .loss-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--navy); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .loss-card-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .loss-card-body  { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+  .bias-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .bias-tag {
+    padding: 7px 14px; border-radius: 20px; font-size: 13px;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text2); transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bias-tag.sel {
+    background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600;
+  }
+
+  .nav-row {
+    display: flex; justify-content: space-between; gap: 12px; margin-top: 24px;
+  }
+  .btn {
+    padding: 13px 20px; border-radius: var(--radius-sm); font-size: 14px;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text1); font-weight: 500;
+    transition: all .15s;
+  }
+  .btn.primary {
+    background: var(--navy); border-color: var(--navy); color: #fff; flex: 1;
+  }
+  .btn.primary:active { transform: scale(.98); }
+
+  .preview-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+  .preview-section {
+    padding-bottom: 14px; margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-section:last-child { border: none; margin: 0; padding: 0; }
+  .preview-title {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .preview-row {
+    font-size: 13px; color: var(--text1); line-height: 1.65; padding: 2px 0;
+  }
+  .preview-row .label { color: var(--text2); }
+
+  .copy-btn {
+    display: block; width: 100%; padding: 14px;
+    background: var(--navy); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+  }
+  .copy-btn:active { transform: scale(.98); }
+
+  .disclaimer {
+    font-size: 11px; color: var(--text3); line-height: 1.6;
+    margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .footer {
+    text-align: center; font-size: 12px; color: var(--text3); margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>나만의 투자 원칙서 (IPS)</h1>
+  <p>2026 서울 리[Re]테크 4회차 · 정원준 CFP</p>
+</div>
+
+<div class="container">
+
+  <div class="step-bar">
+    <button class="step-btn active" onclick="goStep(0)">① 목표</button>
+    <button class="step-btn" onclick="goStep(1)">② 자산 배분</button>
+    <button class="step-btn" onclick="goStep(2)">③ 인출 원칙</button>
+    <button class="step-btn" onclick="goStep(3)">④ 투자 원칙</button>
+    <button class="step-btn" onclick="goStep(4)">⑤ 편향 극복</button>
+    <button class="step-btn" onclick="goStep(5)">원칙서 보기</button>
+  </div>
+
+  <div class="section active" id="sec0">
+    <p class="section-title">재무 목표 설정</p>
+    <p class="section-sub">달성하고 싶은 목표를 구체적으로 적어주세요</p>
+    <div class="field">
+      <label>이름</label>
+      <input type="text" id="f-name" placeholder="홍길동">
+    </div>
+    <div class="field">
+      <label>재무 목표 1 (가장 중요한 목표)</label>
+      <div class="field-hint">예) 65세까지 은퇴 자금 2억 마련</div>
+      <input type="text" id="f-goal1" placeholder="구체적으로 입력해주세요">
+    </div>
+    <div class="field">
+      <label>재무 목표 2 (선택)</label>
+      <input type="text" id="f-goal2" placeholder="예) 3년 내 여행 자금 500만원">
+    </div>
+    <div class="field">
+      <label>재무 목표 3 (선택)</label>
+      <input type="text" id="f-goal3" placeholder="">
+    </div>
+    <div class="nav-row">
+      <button class="btn primary" onclick="goStep(1)">다음 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec1">
+    <p class="section-title">자산 배분 원칙</p>
+    <p class="section-sub">1회차 강의 — 분산 투자의 정석</p>
+    <div class="field">
+      <label>자산 배분 비율 (합계 100%)</label>
+      <div class="grid4" style="margin-top:8px">
+        <div class="alloc-wrap">
+          <label>국내 주식</label>
+          <input type="number" id="a-kr" min="0" max="100" value="30" oninput="calcTotal()">
+          <div class="unit">%</div>
+        </div>
+        <div class="alloc-wrap">
+          <label>해외 주식</label>
+          <input type="number" id="a-ov" min="0" max="100" value="30" oninput="calcTotal()">
+          <div class="unit">%</div>
+        </div>
+        <div class="alloc-wrap">
+          <label>채권</label>
+          <input type="number" id="a-bond" min="0" max="100" value="20" oninput="calcTotal()">
+          <div class="unit">%</div>
+        </div>
+        <div class="alloc-wrap">
+          <label>현금·기타</label>
+          <input type="number" id="a-cash" min="0" max="100" value="20" oninput="calcTotal()">
+          <div class="unit">%</div>
+        </div>
+      </div>
+      <div id="total-badge" class="total-badge badge-ok">합계 100% ✓</div>
+    </div>
+    <div class="field">
+      <label>리밸런싱 주기</label>
+      <select id="f-rebal">
+        <option>분기 (3개월)</option>
+        <option selected>반기 (6개월)</option>
+        <option>연간 (1년)</option>
+      </select>
+    </div>
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(0)">← 이전</button>
+      <button class="btn primary" onclick="goStep(2)">다음 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec2">
+    <p class="section-title">인출 원칙</p>
+    <p class="section-sub">2회차 강의 — 품격 있게 꺼내 쓰는 전략</p>
+
+    <div class="info-box">
+      ℹ️ 공적연금(국민연금·공무원연금 등)은 수령 시점에 자동 지급되므로 인출 순서 목록에서 제외했습니다. 아래 순서는 공적연금 수령 이후 추가 인출이 필요할 때 활용합니다.
+    </div>
+
+    <div class="field">
+      <label>월 필요 생활비 (은퇴 후)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="number" id="f-living" placeholder="300" style="width:140px">
+        <span style="font-size:14px;color:var(--text2)">만원 / 월</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>인출 순서 (↑↓ 버튼으로 조정)</label>
+      <div class="field-hint">공적연금 수령 후, 아래 순서대로 인출합니다</div>
+      <div id="order-list"></div>
+    </div>
+
+    <div class="field">
+      <label>비상금 목표액</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="number" id="f-emerg" placeholder="500" style="width:140px">
+        <span style="font-size:14px;color:var(--text2)">만원</span>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(1)">← 이전</button>
+      <button class="btn primary" onclick="goStep(3)">다음 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec3">
+    <p class="section-title">투자 원칙</p>
+    <p class="section-sub">3·4회차 강의 — 분석 원칙과 LOSS 3원칙</p>
+
+    <div class="field">
+      <label>손절 기준</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="number" id="f-cut" placeholder="10" min="1" max="50" style="width:90px">
+        <span style="font-size:14px;color:var(--text2)">% 하락 시 손절</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>익절 기준</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="number" id="f-take" placeholder="20" min="1" max="200" style="width:90px">
+        <span style="font-size:14px;color:var(--text2)">% 상승 시 일부 익절</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>LOSS 3원칙 (짐 폴·모이니핸)</label>
+      <div class="loss-card">
+        <div class="loss-card-title">규칙 1. 진입 전에 출구를 결정한다</div>
+        <div class="loss-card-body">매수 전 손절 가격을 미리 정하고 실행합니다</div>
+      </div>
+      <div class="loss-card">
+        <div class="loss-card-title">규칙 2. 손실을 외부 사건으로 처리한다</div>
+        <div class="loss-card-body">주가 하락은 나의 실패가 아닙니다. 분석·수정의 대상입니다</div>
+      </div>
+      <div class="loss-card">
+        <div class="loss-card-title">규칙 3. 성공이 반복될 때 더 조심한다</div>
+        <div class="loss-card-body">연속 수익 → 과신 → 규칙 이탈의 패턴을 경계합니다</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>나의 투자 금지 행동 3가지</label>
+      <div class="field-hint">예) 느낌으로만 투자하기 / 손절 기준 어기기 / FOMO 매수</div>
+      <div class="rule-item"><div class="rule-num">1</div><input type="text" id="f-ban1" placeholder="금지 행동 1"></div>
+      <div class="rule-item" style="margin-top:8px"><div class="rule-num">2</div><input type="text" id="f-ban2" placeholder="금지 행동 2"></div>
+      <div class="rule-item" style="margin-top:8px"><div class="rule-num">3</div><input type="text" id="f-ban3" placeholder="금지 행동 3"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(2)">← 이전</button>
+      <button class="btn primary" onclick="goStep(4)">다음 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec4">
+    <p class="section-title">편향 극복 약속</p>
+    <p class="section-sub">4회차 강의 — 마음의 함정 극복하기</p>
+
+    <div class="field">
+      <label>나의 주요 편향 (해당하는 것 모두 선택)</label>
+      <div class="field-hint">실습 ① 결과를 참고해 선택하세요</div>
+      <div class="bias-tags">
+        <button class="bias-tag" onclick="toggleBias(this,'손실 회피')">⚖ 손실 회피</button>
+        <button class="bias-tag" onclick="toggleBias(this,'현재 편향')">⏰ 현재 편향</button>
+        <button class="bias-tag" onclick="toggleBias(this,'확증 편향')">🔍 확증 편향</button>
+        <button class="bias-tag" onclick="toggleBias(this,'닻내리기')">⚓ 닻내리기</button>
+        <button class="bias-tag" onclick="toggleBias(this,'심적 계정')">👛 심적 계정</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>편향 극복을 위한 구체적 실천 행동</label>
+      <div class="field-hint">예) 급여일마다 자동이체 / 투자 전 반대 의견 3개 찾기</div>
+      <textarea id="f-action" placeholder="실천할 행동을 직접 써주세요"></textarea>
+    </div>
+    <div class="field">
+      <label>원칙서 점검 주기</label>
+      <select id="f-review">
+        <option>월 1회</option>
+        <option selected>분기 1회</option>
+        <option>반기 1회</option>
+      </select>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(3)">← 이전</button>
+      <button class="btn primary" onclick="goStep(5)">원칙서 완성 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec5">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <p class="section-title" style="margin:0">나만의 투자 원칙서</p>
+      <span id="doc-date" style="font-size:11px;color:var(--text3)"></span>
+    </div>
+
+    <div class="preview-card" id="preview-card"></div>
+
+    <button class="copy-btn" id="copy-btn" onclick="copyText()">텍스트 복사하기</button>
+
+    <div class="nav-row" style="margin-top:12px">
+      <button class="btn" onclick="goStep(4)">← 수정하기</button>
+    </div>
+
+    <p class="disclaimer">
+      본 원칙서는 개인 교육 목적의 참고 문서입니다.<br>
+      실제 투자 결정은 공인 전문가 상담을 권장합니다.
+    </p>
+    <div class="footer">바른재무설계 · 정원준 CFP · 국가공인 신용상담사</div>
+  </div>
+
+</div>
+
+<script>
+const FIXED_ORDERS = [
+  { label:'입출금·CMA',              custom:false },
+  { label:'정기예금',                 custom:false },
+  { label:'연금계좌 (IRP·연금저축)',  custom:false },
+  { label:'투자 자산',                custom:false },
+  { label:'그 외 기타',               custom:true, placeholder:'직접 입력 (예: 부동산 임대수익)' },
+];
+
+let orderData = FIXED_ORDERS.map(o => ({ ...o, value: '' }));
+let selectedBiases = [];
+let curStep = 0;
+
+function goStep(n) {
+  document.querySelectorAll('.section').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.step-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === n);
+  });
+  curStep = n;
+  if (n === 5) buildPreview();
+  window.scrollTo(0, 0);
+}
+
+function calcTotal() {
+  const ids = ['a-kr','a-ov','a-bond','a-cash'];
+  const tot = ids.reduce((s, id) => s + (+(document.getElementById(id).value) || 0), 0);
+  const badge = document.getElementById('total-badge');
+  if (tot === 100) {
+    badge.textContent = '합계 100% ✓';
+    badge.className = 'total-badge badge-ok';
+  } else if (tot > 100) {
+    badge.textContent = `합계 ${tot}% — 100%를 초과합니다`;
+    badge.className = 'total-badge badge-err';
+  } else {
+    badge.textContent = `합계 ${tot}% — 100%가 되도록 입력하세요`;
+    badge.className = 'total-badge badge-warn';
+  }
+}
+
+function renderOrder() {
+  document.getElementById('order-list').innerHTML = orderData.map((item, i) => `
+    <div class="order-item">
+      <div class="order-num">${i + 1}</div>
+      ${item.custom
+        ? `<input class="order-input" type="text"
+             placeholder="${item.placeholder}"
+             value="${item.value}"
+             oninput="orderData[${i}].value=this.value">`
+        : `<span class="order-label">${item.label}</span>`
+      }
+      <div class="order-btns">
+        <button onclick="moveOrder(${i},-1)" ${i === 0 ? 'disabled' : ''} aria-label="위로">↑</button>
+        <button onclick="moveOrder(${i}, 1)" ${i === orderData.length-1 ? 'disabled' : ''} aria-label="아래로">↓</button>
+      </div>
+    </div>`).join('');
+}
+
+function moveOrder(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= orderData.length) return;
+  [orderData[i], orderData[j]] = [orderData[j], orderData[i]];
+  renderOrder();
+}
+
+function toggleBias(el, name) {
+  el.classList.toggle('sel');
+  if (el.classList.contains('sel')) selectedBiases.push(name);
+  else selectedBiases = selectedBiases.filter(b => b !== name);
+}
+
+function g(id) { return (document.getElementById(id) || {}).value || ''; }
+
+function getOrderLabels() {
+  return orderData.map(o => o.custom ? (o.value || o.placeholder) : o.label);
+}
+
+function buildPreview() {
+  const d = new Date();
+  document.getElementById('doc-date').textContent =
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+
+  const goals = [g('f-goal1'), g('f-goal2'), g('f-goal3')].filter(Boolean);
+  const bans  = [g('f-ban1'), g('f-ban2'), g('f-ban3')].filter(Boolean);
+  const orderLabels = getOrderLabels();
+  const biasStr = selectedBiases.length ? selectedBiases.join(', ') : '(미선택)';
+
+  document.getElementById('preview-card').innerHTML = `
+    <div class="preview-section">
+      <div class="preview-title">재무 목표</div>
+      ${goals.length
+        ? goals.map((g, i) => `<div class="preview-row">${i+1}. ${g}</div>`).join('')
+        : '<div class="preview-row" style="color:var(--text3)">목표를 입력해주세요</div>'
+      }
+    </div>
+    <div class="preview-section">
+      <div class="preview-title">자산 배분 · 1회차</div>
+      <div class="preview-row">국내 ${g('a-kr')}% / 해외 ${g('a-ov')}% / 채권 ${g('a-bond')}% / 현금 ${g('a-cash')}%</div>
+      <div class="preview-row"><span class="label">리밸런싱: </span>${g('f-rebal')}</div>
+    </div>
+    <div class="preview-section">
+      <div class="preview-title">인출 원칙 · 2회차</div>
+      <div class="preview-row" style="font-size:12px;color:var(--text2);margin-bottom:4px">
+        공적연금 수령 → ${orderLabels.join(' → ')}
+      </div>
+      <div class="preview-row"><span class="label">월 생활비: </span>${g('f-living') || '?'}만원</div>
+      <div class="preview-row"><span class="label">비상금 목표: </span>${g('f-emerg') || '?'}만원</div>
+    </div>
+    <div class="preview-section">
+      <div class="preview-title">투자 원칙 · 3·4회차</div>
+      <div class="preview-row"><span class="label">손절: </span>${g('f-cut') || '?'}% 하락 시 매도</div>
+      <div class="preview-row"><span class="label">익절: </span>${g('f-take') || '?'}% 상승 시 일부 매도</div>
+      ${bans.length ? bans.map((b,i) => `<div class="preview-row">금지 ${i+1}. ${b}</div>`).join('') : ''}
+    </div>
+    <div class="preview-section">
+      <div class="preview-title">편향 극복 · 4회차</div>
+      <div class="preview-row"><span class="label">주요 편향: </span>${biasStr}</div>
+      ${g('f-action') ? `<div class="preview-row" style="margin-top:4px">${g('f-action')}</div>` : ''}
+      <div class="preview-row"><span class="label">점검 주기: </span>${g('f-review')}</div>
+    </div>
+    <div class="preview-section" style="border:none;padding:0;margin:0;padding-top:14px">
+      <div class="preview-title">LOSS 3원칙</div>
+      <div class="preview-row">1. 진입 전에 출구를 결정한다</div>
+      <div class="preview-row">2. 손실을 외부 사건으로 처리한다</div>
+      <div class="preview-row">3. 성공이 반복될 때 더 조심한다</div>
+    </div>`;
+}
+
+function copyText() {
+  const d = new Date();
+  const goals = [g('f-goal1'), g('f-goal2'), g('f-goal3')].filter(Boolean);
+  const bans  = [g('f-ban1'), g('f-ban2'), g('f-ban3')].filter(Boolean);
+  const orderLabels = getOrderLabels();
+
+  const text = `나만의 투자 원칙서 (IPS)
+작성일: ${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일
+작성자: ${g('f-name') || '___'}
+
+[ 재무 목표 ]
+${goals.length ? goals.map((g,i) => `${i+1}. ${g}`).join('\n') : '미입력'}
+
+[ 자산 배분 ]
+국내 주식 ${g('a-kr')}% / 해외 주식 ${g('a-ov')}% / 채권 ${g('a-bond')}% / 현금·기타 ${g('a-cash')}%
+리밸런싱 주기: ${g('f-rebal')}
+
+[ 인출 원칙 ]
+순서: 공적연금 수령 → ${orderLabels.join(' → ')}
+월 필요 생활비: ${g('f-living') || '?'}만원
+비상금 목표: ${g('f-emerg') || '?'}만원
+
+[ 투자 원칙 ]
+손절 기준: ${g('f-cut') || '?'}% 하락 시 매도
+익절 기준: ${g('f-take') || '?'}% 상승 시 일부 매도
+${bans.length ? '금지 행동:\n' + bans.map((b,i) => `  ${i+1}. ${b}`).join('\n') : ''}
+
+[ 편향 극복 약속 ]
+주요 편향: ${selectedBiases.length ? selectedBiases.join(', ') : '미선택'}
+실천 행동: ${g('f-action') || '미입력'}
+점검 주기: ${g('f-review')}
+
+[ LOSS 3원칙 — Jim Paul · Brendan Moynihan ]
+1. 진입 전에 출구를 결정한다
+2. 손실을 외부 사건으로 처리한다
+3. 성공이 반복될 때 더 조심한다`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '복사 완료 ✓';
+    setTimeout(() => { btn.textContent = '텍스트 복사하기'; }, 2500);
+  });
+}
+
+renderOrder();
+calcTotal();
+</script>
+</body>
+</html>

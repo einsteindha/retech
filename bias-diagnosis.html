@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재무 편향 자가진단 | 바른재무설계 정원준 CFP</title>
+<meta name="description" content="5대 재무 편향(손실 회피·현재 편향·확증 편향·닻내리기·심적 계정) 자가진단 체크리스트">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #1E2761;
+    --orange:  #E8834A;
+    --white:   #FFFFFF;
+    --bg:      #F4F7FF;
+    --card:    #FFFFFF;
+    --border:  #DEE5F7;
+    --text1:   #1A1A2E;
+    --text2:   #5A6080;
+    --text3:   #9AA0BC;
+    --red:     #C0392B;
+    --purple:  #8E44AD;
+    --blue:    #2980B9;
+    --green:   #27AE60;
+    --radius:  12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:    #0F1220;
+      --card:  #1A1F35;
+      --border:#2D3555;
+      --text1: #E8EAF6;
+      --text2: #8892C0;
+      --text3: #555F8A;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text1);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  .header {
+    background: var(--navy);
+    color: #fff;
+    padding: 20px 24px 16px;
+    text-align: center;
+  }
+  .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .header p  { font-size: 13px; opacity: .75; }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .progress-bar  { height: 5px; background: var(--border); border-radius: 3px; }
+  .progress-fill { height: 100%; background: var(--navy); border-radius: 3px; transition: width .3s; }
+
+  .bias-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 5px 14px;
+    border-radius: 20px; margin-bottom: 14px;
+  }
+
+  .q-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+  .q-text { font-size: 16px; line-height: 1.65; margin-bottom: 18px; color: var(--text1); }
+
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt {
+    padding: 10px 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg); font-size: 13px; color: var(--text2);
+    cursor: pointer; text-align: center; transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .opt:active { transform: scale(.97); }
+  .opt.sel { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600; }
+
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; gap: 12px;
+  }
+  .btn {
+    padding: 12px 24px; border-radius: var(--radius-sm); font-size: 14px;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text1); font-weight: 500;
+    transition: all .15s;
+  }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; flex: 1; }
+  .btn.primary:active { transform: scale(.98); }
+
+  .result-header { text-align: center; margin-bottom: 24px; }
+  .result-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .result-header p  { font-size: 13px; color: var(--text2); }
+
+  .radar-wrap { max-width: 340px; margin: 0 auto 24px; }
+
+  .sum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px,1fr)); gap: 10px; margin-bottom: 28px; }
+  .sum-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px; text-align: center;
+  }
+  .sum-level { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .sum-name  { font-size: 13px; font-weight: 600; color: var(--text1); margin-bottom: 8px; }
+  .sum-bar-bg   { height: 6px; background: var(--border); border-radius: 3px; }
+  .sum-bar-fill { height: 100%; border-radius: 3px; transition: width .6s; }
+  .sum-score { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+  .rx-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .rx-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    border-left-width: 4px; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .rx-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .rx-level { font-size: 11px; font-weight: 400; margin-left: 8px; opacity: .75; }
+  .rx-body  { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+  .retake-btn {
+    display: block; width: 100%; padding: 14px;
+    margin-top: 24px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--card);
+    color: var(--text1); font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+
+  .disclaimer {
+    font-size: 11px; color: var(--text3); line-height: 1.6;
+    margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer {
+    text-align: center; font-size: 12px; color: var(--text3);
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>재무 편향 자가진단</h1>
+  <p>2026 서울 리[Re]테크 4회차 · 정원준 CFP</p>
+</div>
+
+<div class="container">
+
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="q-label">문항 1 / 25</span>
+        <span id="bias-label"></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog" style="width:4%"></div></div>
+    </div>
+
+    <div id="quiz-area"></div>
+
+    <div class="nav-row">
+      <button class="btn" id="prev-btn" onclick="prevQ()" disabled>← 이전</button>
+      <button class="btn primary" id="next-btn" onclick="nextQ()" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <div id="result-wrap" style="display:none">
+    <div class="result-header">
+      <h2>진단 완료</h2>
+      <p>5대 편향별 점수와 맞춤 처방입니다</p>
+    </div>
+
+    <div class="radar-wrap"><canvas id="radar-chart"></canvas></div>
+    <div class="sum-grid" id="sum-grid"></div>
+
+    <div class="rx-section">
+      <h3>5대 편향 맞춤 처방</h3>
+      <div id="rx-area"></div>
+    </div>
+
+    <button class="retake-btn" onclick="retake()">↺ 다시 진단하기</button>
+
+    <p class="disclaimer">
+      본 진단은 교육 목적의 자가 체크리스트이며, 임상적 심리 진단이 아닙니다.<br>
+      투자 결정은 공인 전문가 상담을 권장합니다.
+    </p>
+
+    <div class="footer">바른재무설계 · 정원준 CFP · 국가공인 신용상담사</div>
+  </div>
+
+</div>
+
+<script>
+const BIASES = [
+  { id:'loss',    name:'손실 회피', color:'#C0392B' },
+  { id:'present', name:'현재 편향', color:'#E8834A' },
+  { id:'confirm', name:'확증 편향', color:'#8E44AD' },
+  { id:'anchor',  name:'닻내리기',  color:'#2980B9' },
+  { id:'mental',  name:'심적 계정', color:'#27AE60' },
+];
+
+const ACCENT = {
+  loss:'#FADBD8', present:'#FDEBD0', confirm:'#F5EEF8',
+  anchor:'#D6EAF8', mental:'#D5F5E3'
+};
+
+const QUESTIONS = [
+  { bias:'loss',    q:'손해를 보고 있는 주식·펀드를 팔기가 심리적으로 매우 어렵다.' },
+  { bias:'loss',    q:'이익이 난 투자 상품은 손실이 생길까봐 빨리 매도하는 편이다.' },
+  { bias:'loss',    q:'투자 수익보다 손실이 날 때 감정의 동요가 훨씬 크다.' },
+  { bias:'loss',    q:'본전을 회복하기 전까지는 절대 팔지 않겠다는 생각을 해본 적 있다.' },
+  { bias:'loss',    q:'포트폴리오 전체보다 개별 종목의 손익에 더 신경이 쓰인다.' },
+  { bias:'present', q:'저축이나 투자는 다음 달부터 해야지 하고 미룬 경험이 있다.' },
+  { bias:'present', q:'노후 준비가 중요하다는 것을 알면서도 지금 당장 실천하기 어렵다.' },
+  { bias:'present', q:'급여 계좌에서 저축·투자 자동이체를 따로 설정하지 않고 남는 돈을 저축하는 편이다.' },
+  { bias:'present', q:'30년 후 은퇴 자금보다 오늘 점심 메뉴 선택이 훨씬 더 현실적으로 느껴진다.' },
+  { bias:'present', q:'작심삼일을 반복하면서도 결심만 새로 하는 경우가 많다.' },
+  { bias:'confirm', q:'투자 정보를 검색할 때 내 생각과 비슷한 방향의 자료를 주로 찾게 된다.' },
+  { bias:'confirm', q:'내가 투자한 종목에 대한 부정적 뉴스는 크게 신경 쓰지 않는 편이다.' },
+  { bias:'confirm', q:'같은 생각을 가진 투자 커뮤니티나 채널을 주로 구독하는 편이다.' },
+  { bias:'confirm', q:'투자 결정을 내린 후 그 결정을 지지하는 자료를 추가로 찾는 경향이 있다.' },
+  { bias:'confirm', q:'손실이 난 후 돌아보면 위험 신호가 있었지만 당시엔 무시했던 경험이 있다.' },
+  { bias:'anchor',  q:'처음 들은 부동산·주식 가격이 이후 판단의 기준이 되는 경우가 많다.' },
+  { bias:'anchor',  q:'할인 전 원가가 표시된 상품을 볼 때 "싸다"는 느낌을 받은 경험이 있다.' },
+  { bias:'anchor',  q:'매수한 가격 기준으로 수익/손실을 판단하는 경향이 강하다.' },
+  { bias:'anchor',  q:'상대방이 먼저 제시한 가격·숫자가 협상의 출발점이 되는 경우가 많다.' },
+  { bias:'anchor',  q:'과거 최고가나 특정 숫자를 기준으로 "아직 쌀 때다"를 판단하는 편이다.' },
+  { bias:'mental',  q:'월급, 보너스, 투자 수익 등 돈의 출처에 따라 쓰는 방식이 다른 편이다.' },
+  { bias:'mental',  q:'적금을 유지하면서 동시에 고금리 대출도 갚지 않고 유지한 경험이 있다.' },
+  { bias:'mental',  q:'"이 돈은 투자용이니까 잃어도 상관없다"고 구분한 적 있다.' },
+  { bias:'mental',  q:'복권 당첨금이나 임시수입은 평소 돈과 다르게 가볍게 쓰는 편이다.' },
+  { bias:'mental',  q:'전체 자산을 한 번에 통합해서 순자산을 파악하는 습관이 없다.' },
+];
+
+const LABELS = ['전혀 아니다', '아닌 편이다', '그런 편이다', '매우 그렇다'];
+
+const RX = {
+  loss: {
+    high: '손실 회피가 높습니다. 투자 원칙을 미리 문서화하세요. "10% 하락 시 손절" 같은 명확한 규칙이 감정보다 강합니다. 포트폴리오 전체 수익률로 평가하고, 6개월마다 기계적 리밸런싱을 설정해보세요.',
+    low:  '손실에 비교적 담담한 편입니다. 이 강점을 살려 명확한 손절 기준을 미리 문서화해두면 더욱 안정적으로 투자할 수 있습니다.'
+  },
+  present: {
+    high: '현재 편향이 높습니다. 급여일 자동이체를 지금 바로 설정하세요. 결심이 필요 없는 구조가 최고의 무기입니다. 퇴직연금 디폴트 옵션도 확인해보시기 바랍니다.',
+    low:  '미래 목표를 위해 현재를 조율하는 힘이 있습니다. 자동화 설정으로 이 강점을 더 굳혀보세요.'
+  },
+  confirm: {
+    high: '확증 편향이 높습니다. 투자 전 "악마의 변호인" 자문을 해보세요. 실패 이유 3가지를 먼저 쓰는 겁니다. 반대 의견을 구독하는 채널 하나를 의도적으로 추가해보세요.',
+    low:  '다양한 시각을 균형 있게 보려는 성향이 있습니다. 투자 일지를 써서 이 객관성을 더 강화해보세요.'
+  },
+  anchor: {
+    high: '닻내리기 효과가 높습니다. 상대방의 숫자를 듣기 전에 내 기준을 먼저 설정하는 습관이 중요합니다. 집을 보거나 투자할 때 내 기준을 먼저 종이에 써보세요.',
+    low:  '숫자에 쉽게 휘둘리지 않는 편입니다. 내 기준 설정 습관을 문서화하면 더욱 견고해집니다.'
+  },
+  mental: {
+    high: '심적 계정 경향이 높습니다. 매월 전체 계좌를 통합해 순자산(자산-부채)을 확인하는 습관을 만들어보세요. 고금리 부채가 있다면 적금보다 먼저 상환하는 것이 수학적으로 유리합니다.',
+    low:  '돈을 통합적으로 바라보는 성향이 있습니다. 월 1회 순자산 점검으로 이 강점을 더 활용하세요.'
+  },
+};
+
+let cur = 0;
+let answers = Array(25).fill(null);
+
+function renderQ() {
+  const q = QUESTIONS[cur];
+  const b = BIASES.find(x => x.id === q.bias);
+  const prev = answers[cur];
+
+  document.getElementById('q-label').textContent = `문항 ${cur + 1} / 25`;
+  document.getElementById('bias-label').textContent = b.name;
+  document.getElementById('prog').style.width = `${Math.max(4, Math.round((cur + 1) / 25 * 100))}%`;
+
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="bias-badge" style="background:${ACCENT[b.id]};color:${b.color}">${b.name}</div>
+    <div class="q-card">
+      <p class="q-text">${q.q}</p>
+      <div class="options">
+        ${LABELS.map((l, i) => `<button class="opt${prev === i + 1 ? ' sel' : ''}" onclick="selectOpt(${i + 1})">${l}</button>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = answers[cur] === null;
+  document.getElementById('next-btn').textContent = cur === 24 ? '결과 보기 →' : '다음 →';
+}
+
+function selectOpt(v) { answers[cur] = v; renderQ(); }
+function prevQ() { if (cur > 0) { cur--; renderQ(); } }
+function nextQ() {
+  if (answers[cur] === null) return;
+  if (cur < 24) { cur++; renderQ(); } else showResult();
+}
+
+function showResult() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  document.getElementById('result-wrap').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  const scores = {};
+  BIASES.forEach(b => { scores[b.id] = 0; });
+  QUESTIONS.forEach((q, i) => { scores[q.bias] += (answers[i] || 1); });
+
+  const isDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  const labelColor = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(26,26,46,0.6)';
+
+  new Chart(document.getElementById('radar-chart').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: BIASES.map(b => b.name),
+      datasets: [{
+        data: BIASES.map(b => Math.round(scores[b.id] / 20 * 100)),
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(30,39,97,0.07)',
+        borderColor: '#1E2761', borderWidth: 2,
+        pointBackgroundColor: BIASES.map(b => b.color), pointRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, font: { size: 10 }, color: labelColor, backdropColor: 'transparent' },
+          pointLabels: { font: { size: 13 }, color: labelColor },
+          grid: { color: gridColor }, angleLines: { color: gridColor }
+        }
+      }
+    }
+  });
+
+  const sorted = [...BIASES].sort((a, b) => scores[b.id] - scores[a.id]);
+
+  document.getElementById('sum-grid').innerHTML = sorted.map(b => {
+    const pct = Math.round(scores[b.id] / 20 * 100);
+    const level = pct >= 70 ? '⚠ 주의' : pct >= 50 ? '관찰' : '양호';
+    return `<div class="sum-card">
+      <div class="sum-level">${level}</div>
+      <div class="sum-name" style="color:${b.color}">${b.name}</div>
+      <div class="sum-bar-bg"><div class="sum-bar-fill" style="width:${pct}%;background:${b.color}"></div></div>
+      <div class="sum-score">${scores[b.id]}점 / 20점</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rx-area').innerHTML = sorted.map(b => {
+    const pct = Math.round(scores[b.id] / 20 * 100);
+    const isHigh = pct >= 50;
+    const level = pct >= 70 ? '주의' : pct >= 50 ? '관찰' : '양호';
+    return `<div class="rx-card" style="border-left-color:${b.color}">
+      <div class="rx-title" style="color:${b.color}">
+        ${b.name}<span class="rx-level">${level} · ${scores[b.id]}점</span>
+      </div>
+      <div class="rx-body">${RX[b.id][isHigh ? 'high' : 'low']}</div>
+    </div>`;
+  }).join('');
+}
+
+function retake() {
+  answers = Array(25).fill(null);
+  cur = 0;
+  document.getElementById('quiz-wrap').style.display = 'block';
+  document.getElementById('result-wrap').style.display = 'none';
+  window.scrollTo(0, 0);
+  renderQ();
+}
+
+renderQ();
+</script>
+</body>
+</html>
