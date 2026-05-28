@@ -105,6 +105,8 @@
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  @media (max-width: 480px) { .grid5 { grid-template-columns: repeat(3, 1fr); } }
   .alloc-wrap { text-align: center; }
   .alloc-wrap label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 5px; }
   .alloc-wrap input { text-align: center; padding: 10px 4px; }
@@ -284,15 +286,15 @@
     <p class="section-sub">1회차 강의 — 분산 투자의 정석</p>
     <div class="field">
       <label>자산 배분 비율 (합계 100%)</label>
-      <div class="grid4" style="margin-top:8px">
+      <div class="grid5" style="margin-top:8px">
         <div class="alloc-wrap">
-          <label>국내 주식</label>
-          <input type="number" id="a-kr" min="0" max="100" value="30" oninput="calcTotal()">
+          <label>선진국 주식</label>
+          <input type="number" id="a-dev" min="0" max="100" value="30" oninput="calcTotal()">
           <div class="unit">%</div>
         </div>
         <div class="alloc-wrap">
-          <label>해외 주식</label>
-          <input type="number" id="a-ov" min="0" max="100" value="30" oninput="calcTotal()">
+          <label>신흥국 주식</label>
+          <input type="number" id="a-em" min="0" max="100" value="20" oninput="calcTotal()">
           <div class="unit">%</div>
         </div>
         <div class="alloc-wrap">
@@ -301,11 +303,17 @@
           <div class="unit">%</div>
         </div>
         <div class="alloc-wrap">
-          <label>현금·기타</label>
+          <label>현금</label>
           <input type="number" id="a-cash" min="0" max="100" value="20" oninput="calcTotal()">
           <div class="unit">%</div>
         </div>
+        <div class="alloc-wrap">
+          <label title="금, 리츠&인프라, 크립토 등">기타</label>
+          <input type="number" id="a-alt" min="0" max="100" value="10" oninput="calcTotal()">
+          <div class="unit">%</div>
+        </div>
       </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">기타: 금, 리츠&amp;인프라, 크립토 등</div>
       <div id="total-badge" class="total-badge badge-ok">합계 100% ✓</div>
     </div>
     <div class="field">
@@ -362,15 +370,19 @@
     <p class="section-title">투자 원칙</p>
     <p class="section-sub">3·4회차 강의 — 분석 원칙과 LOSS 3원칙</p>
 
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px">
+      📌 개별 종목 / 특정 테마·섹터 투자에 적용하는 기준입니다.<br>
+      지수 ETF 등 장기 분산 투자는 별도 기준 불필요 (Just Keep Buying)
+    </div>
     <div class="field">
-      <label>손절 기준</label>
+      <label>손절 기준 <span style="font-size:11px;font-weight:400;color:var(--text3)">— 개별 종목 / 테마·섹터</span></label>
       <div style="display:flex;align-items:center;gap:10px">
         <input type="number" id="f-cut" placeholder="10" min="1" max="50" style="width:90px">
         <span style="font-size:14px;color:var(--text2)">% 하락 시 손절</span>
       </div>
     </div>
     <div class="field">
-      <label>익절 기준</label>
+      <label>익절 기준 <span style="font-size:11px;font-weight:400;color:var(--text3)">— 개별 종목 / 테마·섹터</span></label>
       <div style="display:flex;align-items:center;gap:10px">
         <input type="number" id="f-take" placeholder="20" min="1" max="200" style="width:90px">
         <span style="font-size:14px;color:var(--text2)">% 상승 시 일부 익절</span>
@@ -431,8 +443,9 @@
       <label>원칙서 점검 주기</label>
       <select id="f-review">
         <option>월 1회</option>
-        <option selected>분기 1회</option>
-        <option>반기 1회</option>
+        <option>분기 1회</option>
+        <option selected>반기 1회</option>
+        <option>연 1회</option>
       </select>
     </div>
 
@@ -491,7 +504,7 @@ function goStep(n) {
 }
 
 function calcTotal() {
-  const ids = ['a-kr','a-ov','a-bond','a-cash'];
+  const ids = ['a-dev','a-em','a-bond','a-cash','a-alt'];
   const tot = ids.reduce((s, id) => s + (+(document.getElementById(id).value) || 0), 0);
   const badge = document.getElementById('total-badge');
   if (tot === 100) {
@@ -563,7 +576,7 @@ function buildPreview() {
     </div>
     <div class="preview-section">
       <div class="preview-title">자산 배분 · 1회차</div>
-      <div class="preview-row">국내 ${g('a-kr')}% / 해외 ${g('a-ov')}% / 채권 ${g('a-bond')}% / 현금 ${g('a-cash')}%</div>
+      <div class="preview-row">선진국 ${g('a-dev')}% / 신흥국 ${g('a-em')}% / 채권 ${g('a-bond')}% / 현금 ${g('a-cash')}% / 기타 ${g('a-alt')}%</div>
       <div class="preview-row"><span class="label">리밸런싱: </span>${g('f-rebal')}</div>
     </div>
     <div class="preview-section">
@@ -576,8 +589,8 @@ function buildPreview() {
     </div>
     <div class="preview-section">
       <div class="preview-title">투자 원칙 · 3·4회차</div>
-      <div class="preview-row"><span class="label">손절: </span>${g('f-cut') || '?'}% 하락 시 매도</div>
-      <div class="preview-row"><span class="label">익절: </span>${g('f-take') || '?'}% 상승 시 일부 매도</div>
+      <div class="preview-row"><span class="label">손절 (개별종목/테마·섹터): </span>${g('f-cut') || '?'}% 하락 시 매도</div>
+      <div class="preview-row"><span class="label">익절 (개별종목/테마·섹터): </span>${g('f-take') || '?'}% 상승 시 일부 매도</div>
       ${bans.length ? bans.map((b,i) => `<div class="preview-row">금지 ${i+1}. ${b}</div>`).join('') : ''}
     </div>
     <div class="preview-section">
@@ -608,7 +621,7 @@ function copyText() {
 ${goals.length ? goals.map((g,i) => `${i+1}. ${g}`).join('\n') : '미입력'}
 
 [ 자산 배분 ]
-국내 주식 ${g('a-kr')}% / 해외 주식 ${g('a-ov')}% / 채권 ${g('a-bond')}% / 현금·기타 ${g('a-cash')}%
+선진국 주식 ${g('a-dev')}% / 신흥국 주식 ${g('a-em')}% / 채권 ${g('a-bond')}% / 현금 ${g('a-cash')}% / 기타(금·리츠·크립토) ${g('a-alt')}%
 리밸런싱 주기: ${g('f-rebal')}
 
 [ 인출 원칙 ]
@@ -617,8 +630,8 @@ ${goals.length ? goals.map((g,i) => `${i+1}. ${g}`).join('\n') : '미입력'}
 비상금 목표: ${g('f-emerg') || '?'}만원
 
 [ 투자 원칙 ]
-손절 기준: ${g('f-cut') || '?'}% 하락 시 매도
-익절 기준: ${g('f-take') || '?'}% 상승 시 일부 매도
+손절 기준 (개별종목/테마·섹터): ${g('f-cut') || '?'}% 하락 시 매도
+익절 기준 (개별종목/테마·섹터): ${g('f-take') || '?'}% 상승 시 일부 매도
 ${bans.length ? '금지 행동:\n' + bans.map((b,i) => `  ${i+1}. ${b}`).join('\n') : ''}
 
 [ 편향 극복 약속 ]
