@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>투자 편향 × 미신 자가진단 | 서울 리[Re]테크 1회차</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --blue:    #1E3A5F;
+    --blue-md: #2C5282;
+    --blue-lt: #EBF4FF;
+    --orange:  #F5A623;
+    --orange-lt: #FFF7E6;
+    --gray-bg: #F7F8FA;
+    --border:  #E2E8F0;
+    --text1:   #1A202C;
+    --text2:   #4A5568;
+    --text3:   #A0AEC0;
+    --white:   #FFFFFF;
+    --radius:  12px;
+    --radius-sm: 8px;
+    --shadow:  0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--gray-bg);
+    color: var(--text1);
+    min-height: 100vh;
+  }
+
+  /* ── 뒤로가기 바 ── */
+  .nav-bar {
+    background: var(--blue);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-bar a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .2s;
+  }
+  .nav-bar a:hover { color: #fff; }
+  .nav-bar .sep { color: rgba(255,255,255,0.3); font-size: 13px; }
+  .nav-bar .current { color: #fff; font-size: 13px; font-weight: 600; }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-md) 100%);
+    padding: 32px 20px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .badge-advanced {
+    background: var(--orange);
+    color: #fff;
+  }
+  .badge-series {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--orange); }
+  .header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+  }
+
+  /* ── 컨테이너 ── */
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  /* ── 진행 바 ── */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-info .q-num {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+  .progress-info .bias-tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: var(--blue-lt);
+    color: var(--blue);
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--orange));
+    border-radius: 3px;
+    transition: width .4s ease;
+  }
+
+  /* ── 문항 카드 ── */
+  .question-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px 20px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .question-card .q-text {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--text1);
+    margin-bottom: 20px;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    cursor: pointer;
+    transition: all .2s;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+  }
+  .option-btn:hover {
+    border-color: var(--blue-md);
+    background: var(--blue-lt);
+    color: var(--blue);
+  }
+  .option-btn.selected {
+    border-color: var(--blue);
+    background: var(--blue-lt);
+    color: var(--blue);
+    font-weight: 700;
+  }
+  .option-btn .opt-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .option-btn.selected .opt-dot {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+  .option-btn.selected .opt-dot::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  /* ── 내비 버튼 ── */
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .btn.primary:hover:not(:disabled) { background: var(--blue-md); }
+  .btn:not(.primary):hover:not(:disabled) {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  /* ── 결과 화면 ── */
+  #result-wrap { display: none; }
+
+  .result-header {
+    text-align: center;
+    padding: 28px 20px 20px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .result-header .done-badge {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .result-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+  .result-header p {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .radar-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .radar-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .radar-wrap {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .score-item {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid transparent;
+  }
+  .score-item .s-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .score-item .s-bar-wrap {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  .score-item .s-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .8s ease;
+  }
+  .score-item .s-val {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: right;
+  }
+
+  /* ── 미신 취약 유형 카드 ── */
+  .myth-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .myth-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--blue-lt);
+  }
+  .myth-section .section-title .icon {
+    width: 28px; height: 28px;
+    background: var(--orange);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    color: #fff;
+  }
+  .myth-group {
+    margin-bottom: 16px;
+  }
+  .myth-group:last-child { margin-bottom: 0; }
+  .myth-group .bias-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+  .myth-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .myth-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--gray-bg);
+  }
+  .myth-card .myth-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--orange);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .myth-card .myth-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text1);
+    line-height: 1.45;
+  }
+  .myth-card .myth-sub {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  /* ── 처방 섹션 ── */
+  .rx-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .rx-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--blue-lt);
+  }
+  .rx-section .section-title .icon {
+    width: 28px; height: 28px;
+    background: var(--blue);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    color: #fff;
+  }
+  .rx-item {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+  }
+  .rx-item:last-child { margin-bottom: 0; }
+  .rx-item .rx-bias {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .rx-item .rx-text {
+    font-size: 13px;
+    color: var(--text1);
+    line-height: 1.6;
+  }
+
+  /* ── 다시하기 버튼 ── */
+  .retake-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--white);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all .2s;
+  }
+  .retake-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  .disclaimer {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.7;
+    text-align: center;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-credit {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 뒤로가기 바 -->
+<div class="nav-bar">
+  <a href="index.html">← 허브로 돌아가기</a>
+  <span class="sep">›</span>
+  <span class="current">편향 × 미신 자가진단</span>
+</div>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="badge-row">
+    <span class="badge badge-advanced">🔥 심화</span>
+    <span class="badge badge-series">2026 서울 리[Re]테크 · 1회차</span>
+  </div>
+  <h1>투자 편향 <span>×</span> 미신<br>자가진단</h1>
+  <p>25개 문항으로 나의 편향을 확인하고<br>어떤 투자 미신에 빠지기 쉬운지 파악합니다</p>
+</div>
+
+<div class="container">
+
+  <!-- 퀴즈 -->
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="q-num" id="q-label">문항 1 / 25</span>
+        <span class="bias-tag" id="bias-tag"></span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="prog" style="width:4%"></div>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn" id="prev-btn" onclick="prevQ()" disabled>← 이전</button>
+      <button class="btn primary" id="next-btn" onclick="nextQ()" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="result-wrap">
+    <div class="result-header">
+      <div class="done-badge">✓ 진단 완료</div>
+      <h2>나의 투자 편향 × 미신 유형</h2>
+      <p>5대 편향 점수와 걸리기 쉬운 미신을 확인하세요</p>
+    </div>
+
+    <div class="radar-card">
+      <h3>📊 5대 편향 레이더 차트</h3>
+      <div class="radar-wrap"><canvas id="radar-chart"></canvas></div>
+    </div>
+
+    <div class="score-grid" id="score-grid"></div>
+
+    <div class="myth-section">
+      <div class="section-title">
+        <div class="icon">🎯</div>
+        당신이 걸리기 쉬운 미신 유형
+      </div>
+      <div id="myth-area"></div>
+    </div>
+
+    <div class="rx-section">
+      <div class="section-title">
+        <div class="icon">💊</div>
+        편향별 맞춤 처방
+      </div>
+      <div id="rx-area"></div>
+    </div>
+
+    <button class="retake-btn" onclick="retake()">↺ 다시 진단하기</button>
+
+    <div class="disclaimer">
+      본 진단은 교육 목적의 자가 체크리스트이며, 임상적 심리 진단이 아닙니다.<br>
+      투자 결정은 공인 전문가 상담을 권장합니다.
+    </div>
+    <div class="footer-credit">정원준 CFP · 국가공인 신용상담사</div>
+  </div>
+
+</div>
+
+<script>
+const BIASES = [
+  { id:'loss',    name:'손실회피',   color:'#C0392B', bg:'#FADBD8' },
+  { id:'avail',   name:'가용성편향', color:'#E67E22', bg:'#FDEBD0' },
+  { id:'confirm', name:'확증편향',   color:'#8E44AD', bg:'#F5EEF8' },
+  { id:'pattern', name:'패턴편향',   color:'#2980B9', bg:'#D6EAF8' },
+  { id:'herd',    name:'군중·후회',  color:'#27AE60', bg:'#D5F5E3' },
+];
+
+const MYTHS = {
+  loss: [
+    { num:'①', text:'채권이 주식보다 안전하다', sub:'장기 구매력 기준으로는 주식이 우위' },
+    { num:'②', text:'손절매가 손실을 막아준다', sub:'감정적 손절이 오히려 수익 기회를 단절' },
+  ],
+  avail: [
+    { num:'③', text:'테러·재난이 오면 팔아야 한다', sub:'공포 절정이 역사적으로 매수 타이밍' },
+    { num:'⑦', text:'나쁜 뉴스=나쁜 시장', sub:'시장은 뉴스보다 6~12개월 선행' },
+  ],
+  confirm: [
+    { num:'④', text:'고배당주가 노후에 안전하다', sub:'총수익률(배당+주가) 기준으로 봐야' },
+    { num:'⑪', text:'다수가 믿는 것은 대체로 맞다', sub:'시장은 다수가 틀리도록 설계' },
+  ],
+  pattern: [
+    { num:'⑥', text:'시장 수익률은 매년 비슷하다', sub:'실제 연수익률은 극단적으로 분포' },
+    { num:'⑨', text:'역사 패턴으로 미래를 예측할 수 있다', sub:'반복되는 건 인간의 망각과 감정' },
+    { num:'⑩', text:'환율·실업률로 시장을 예측할 수 있다', sub:'단순 인과관계는 데이터로 불일치' },
+  ],
+  herd: [
+    { num:'⑧', text:'군중과 반대로 하면 역발상이다', sub:'진짜 역발상은 독립적 각도, 단순 반대가 아님' },
+    { num:'⑤', text:'DCA는 무조건 수익에 유리하다', sub:'목돈은 일시투자가 약 68~75% 확률로 우위' },
+    { num:'⑪', text:'다들 사니까 나도 사야 한다', sub:'FOMO가 고점 매수를 만드는 핵심 기제' },
+  ],
+};
+
+const RX = {
+  loss: {
+    high: '손실회피 편향이 높습니다. 투자 전 손절 기준을 먼저 문서화하세요. "10% 하락 시 손절"처럼 명확한 규칙이 감정보다 강합니다. 채권 선호가 지나치게 강하다면 장기 수익률 데이터를 다시 확인해보세요.',
+    low:  '손실에 비교적 담담한 편입니다. 이 강점을 살려 명확한 손절 기준을 미리 세워두면 더욱 안정적으로 투자할 수 있습니다.',
+  },
+  avail: {
+    high: '가용성 편향이 높습니다. 뉴스 보도 빈도와 실제 투자 영향을 구분하는 연습이 필요합니다. 재난·위기 뉴스를 접할 때 "시장은 이미 이를 가격에 반영했는가?"를 먼저 물어보세요.',
+    low:  '뉴스에 비교적 흔들리지 않는 편입니다. 이 특성을 유지하면서 데이터 기반 판단 습관을 강화해보세요.',
+  },
+  confirm: {
+    high: '확증 편향이 높습니다. 투자 전 반대 의견을 의도적으로 검색하는 "악마의 변호인" 습관을 들이세요. 내 생각과 다른 유튜브 채널 하나를 구독해두는 것도 효과적입니다.',
+    low:  '다양한 시각을 균형 있게 보려는 성향이 있습니다. 투자 일지를 써서 이 객관성을 더 강화해보세요.',
+  },
+  pattern: {
+    high: '패턴 편향이 높습니다. 차트 패턴과 역사적 공식에 지나치게 의존하지 않도록 주의하세요. "이번엔 같을 것"이라는 확신이 강할수록 한 번 더 의심해보세요.',
+    low:  '패턴 맹신에 비교적 신중한 편입니다. 데이터를 참고용으로 활용하는 현재 태도를 유지하세요.',
+  },
+  herd: {
+    high: '군중심리·후회회피 편향이 높습니다. 주변에서 다들 산다는 얘기가 나올 때가 가장 위험한 순간입니다. 목돈이 생겼을 때 일시투자 vs DCA 중 어떤 선택이 나에게 맞는지 기준을 미리 세워두세요.',
+    low:  '군중 흐름에 비교적 독립적인 편입니다. 이 독립성을 유지하면서 나만의 투자 원칙서를 만들어두면 더욱 강해집니다.',
+  },
+};
+
+const QUESTIONS = [
+  // 손실회피 (5)
+  { bias:'loss',    q:'손해 중인 주식·펀드를 팔기가 심리적으로 매우 어렵다.' },
+  { bias:'loss',    q:'이익이 난 종목은 더 오를 것 같아도 불안해서 빨리 파는 편이다.' },
+  { bias:'loss',    q:'채권이나 예금이 주식보다 안전하다고 느껴서 더 선호한다.' },
+  { bias:'loss',    q:'본전이 되기 전까지는 절대 팔지 않겠다고 생각한 적이 있다.' },
+  { bias:'loss',    q:'투자 손실이 났을 때 수익이 났을 때보다 감정 동요가 훨씬 크다.' },
+  // 가용성 (5)
+  { bias:'avail',   q:'전쟁·테러·재난 뉴스를 보면 주식을 팔아야 할 것 같은 충동이 든다.' },
+  { bias:'avail',   q:'최근 뉴스에서 많이 다룬 종목이나 테마가 더 좋아 보인다.' },
+  { bias:'avail',   q:'주변에서 큰 손실을 봤다는 이야기를 들으면 투자 자체가 두렵게 느껴진다.' },
+  { bias:'avail',   q:'경제 위기 뉴스가 반복되면 시장 전체가 무너질 것 같은 느낌이 든다.' },
+  { bias:'avail',   q:'좋은 뉴스가 나오면 주가가 오르고, 나쁜 뉴스가 나오면 내린다고 생각하는 편이다.' },
+  // 확증 (5)
+  { bias:'confirm', q:'특정 종목이 좋다고 생각하면 상승 근거 위주로 정보를 찾게 된다.' },
+  { bias:'confirm', q:'고배당주는 노후에 안정적이라는 믿음이 있어서 반대 의견은 크게 신경 쓰지 않는다.' },
+  { bias:'confirm', q:'내 판단과 다른 의견을 들으면 그 논리보다 그 사람의 동기를 의심하게 된다.' },
+  { bias:'confirm', q:'한 번 투자한 종목의 부정적 뉴스는 일부러 찾아보지 않는 편이다.' },
+  { bias:'confirm', q:'투자 커뮤니티나 유튜브에서 내 생각과 비슷한 채널·게시글을 주로 본다.' },
+  // 패턴 (5)
+  { bias:'pattern', q:'최근 3년 연속 오른 자산은 앞으로도 오를 것 같다.' },
+  { bias:'pattern', q:'주식시장은 역사적 패턴이 반복되므로 어느 정도 예측이 가능하다고 생각한다.' },
+  { bias:'pattern', q:'차트에서 특정 모양이 나오면 이후 방향을 예측할 수 있다고 믿는다.' },
+  { bias:'pattern', q:'주식시장 연평균 수익률이 약 10%이므로 매년 10% 정도 기대하는 게 합리적이다.' },
+  { bias:'pattern', q:'환율이 오르면 수출주가 오른다는 식의 공식이 대체로 맞다고 생각한다.' },
+  // 군중·후회 (5)
+  { bias:'herd',    q:'주변에서 다들 특정 주식을 산다고 하면 나도 사야 할 것 같은 압박을 느낀다.' },
+  { bias:'herd',    q:'목돈이 생겼을 때 한 번에 투자하면 불안해서 조금씩 나눠 넣는 편이다.' },
+  { bias:'herd',    q:'내가 판 후 주가가 오른 경험이 있어서 이후엔 파는 결정을 더 미루게 됐다.' },
+  { bias:'herd',    q:'많은 사람이 좋다고 하는 상품이나 종목은 그럴 만한 이유가 있다고 생각한다.' },
+  { bias:'herd',    q:'유행하는 투자 트렌드(테마주·코인 등)에 올라타지 않으면 손해 보는 것 같다.' },
+];
+
+const LABELS = ['전혀 아니다','아닌 편이다','그런 편이다','매우 그렇다'];
+
+let answers = new Array(25).fill(null);
+let current = 0;
+let chart = null;
+
+function biasName(id) {
+  return BIASES.find(b => b.id === id)?.name || id;
+}
+
+function renderQ() {
+  const q = QUESTIONS[current];
+  const bias = BIASES.find(b => b.id === q.bias);
+
+  document.getElementById('q-label').textContent = `문항 ${current+1} / 25`;
+  document.getElementById('bias-tag').textContent = bias.name;
+  document.getElementById('prog').style.width = `${((current+1)/25)*100}%`;
+  document.getElementById('q-text').textContent = q.q;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  LABELS.forEach((lbl, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (answers[current] === i+1 ? ' selected' : '');
+    btn.innerHTML = `<span class="opt-dot"></span><span>${lbl}</span>`;
+    btn.onclick = () => {
+      answers[current] = i+1;
+      renderQ();
+      document.getElementById('next-btn').disabled = false;
+    };
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = answers[current] === null;
+  document.getElementById('next-btn').textContent =
+    current === 24 ? '결과 보기 →' : '다음 →';
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+function nextQ() {
+  if (current < 24) { current++; renderQ(); }
+  else showResult();
+}
+
+function calcScores() {
+  const scores = {};
+  BIASES.forEach(b => { scores[b.id] = 0; });
+  QUESTIONS.forEach((q, i) => {
+    scores[q.bias] += (answers[i] || 1);
+  });
+  return scores;
+}
+
+function showResult() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  const rw = document.getElementById('result-wrap');
+  rw.style.display = 'block';
+
+  const scores = calcScores();
+
+  // 레이더 차트
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('radar-chart'), {
+    type: 'radar',
+    data: {
+      labels: BIASES.map(b => b.name),
+      datasets: [{
+        data: BIASES.map(b => scores[b.id]),
+        backgroundColor: 'rgba(30,58,95,0.15)',
+        borderColor: '#1E3A5F',
+        borderWidth: 2,
+        pointBackgroundColor: BIASES.map(b => b.color),
+        pointRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 5, max: 20,
+          ticks: { stepSize: 5, font: { size: 10 } },
+          pointLabels: { font: { size: 11, weight: '700' } },
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // 점수 그리드
+  const sg = document.getElementById('score-grid');
+  sg.innerHTML = '';
+  BIASES.forEach(b => {
+    const pct = Math.round(((scores[b.id]-5)/15)*100);
+    const item = document.createElement('div');
+    item.className = 'score-item';
+    item.style.borderLeftColor = b.color;
+    item.innerHTML = `
+      <div class="s-label">${b.name}</div>
+      <div class="s-bar-wrap">
+        <div class="s-bar" style="width:${pct}%;background:${b.color}"></div>
+      </div>
+      <div class="s-val">${scores[b.id]} / 20점</div>
+    `;
+    sg.appendChild(item);
+  });
+
+  // 상위 2개 편향 추출
+  const sorted = BIASES
+    .map(b => ({ ...b, score: scores[b.id] }))
+    .sort((a,b) => b.score - a.score);
+  const top2 = sorted.slice(0,2);
+
+  // 미신 취약 유형 카드
+  const ma = document.getElementById('myth-area');
+  ma.innerHTML = '';
+  top2.forEach(b => {
+    const myths = MYTHS[b.id];
+    if (!myths) return;
+    const group = document.createElement('div');
+    group.className = 'myth-group';
+    group.innerHTML = `
+      <div class="bias-label" style="background:${b.color}">
+        ${b.name} 편향 높음
+      </div>
+      <div class="myth-cards">
+        ${myths.map(m => `
+          <div class="myth-card">
+            <div class="myth-num">미신 ${m.num}</div>
+            <div>
+              <div class="myth-text">${m.text}</div>
+              <div class="myth-sub">${m.sub}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    ma.appendChild(group);
+  });
+
+  // 처방 카드 (전체 5개)
+  const ra = document.getElementById('rx-area');
+  ra.innerHTML = '';
+  BIASES.forEach(b => {
+    const isHigh = scores[b.id] >= 14;
+    const rx = RX[b.id];
+    if (!rx) return;
+    const item = document.createElement('div');
+    item.className = 'rx-item';
+    item.style.background = b.bg;
+    item.style.borderLeftColor = b.color;
+    item.innerHTML = `
+      <div class="rx-bias" style="color:${b.color}">
+        ${isHigh ? '⚠️' : '✅'} ${b.name}
+        ${isHigh ? '— 주의 필요' : '— 양호'}
+      </div>
+      <div class="rx-text">${isHigh ? rx.high : rx.low}</div>
+    `;
+    ra.appendChild(item);
+  });
+}
+
+function retake() {
+  answers = new Array(25).fill(null);
+  current = 0;
+  document.getElementById('result-wrap').style.display = 'none';
+  document.getElementById('quiz-wrap').style.display = 'block';
+  renderQ();
+}
+
+// 초기 렌더
+renderQ();
+</script>
+</body>
+</html>
