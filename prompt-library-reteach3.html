@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 분석 프롬프트 라이브러리 | 리[Re]테크 심화 3회차</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: #F0F2F5;
+      color: #1E2A3A;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    header {
+      background: #1E3A5F;
+      color: white;
+      padding: 20px 20px 16px;
+    }
+    header .label {
+      font-size: 12px;
+      color: #F5A623;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    header p {
+      font-size: 14px;
+      color: #A8C0D6;
+      margin-top: 6px;
+    }
+
+    .tabs-wrapper {
+      background: white;
+      border-bottom: 1px solid #E5E7EB;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+    .tabs {
+      display: flex;
+      min-width: max-content;
+      padding: 0 12px;
+    }
+    .tab {
+      flex-shrink: 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6B7280;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .tab.active {
+      color: #1E3A5F;
+      border-bottom-color: #F5A623;
+      font-weight: 700;
+    }
+
+    .content {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1E3A5F;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .prompt-box {
+      background: #F8F9FA;
+      border: 1px solid #E5E7EB;
+      border-left: 4px solid #1E3A5F;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #2C3E50;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+
+    .placeholder {
+      color: #9CA3AF;
+      font-style: italic;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: #F5A623;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:active { transform: scale(0.97); }
+    .copy-btn.copied {
+      background: #22C55E;
+    }
+
+    .tip-box {
+      background: #FFF8EC;
+      border: 1px solid #F5A623;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #92400E;
+      line-height: 1.6;
+    }
+    .tip-box strong {
+      color: #F5A623;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .ai-badge {
+      display: inline-block;
+      background: #EEF2FF;
+      color: #4338CA;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 12px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 12px;
+      color: #9CA3AF;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="label">2026 서울 리[Re]테크 심화 3회차</div>
+  <h1>AI 분석 프롬프트<br>라이브러리</h1>
+  <p>탭을 선택해 프롬프트를 복사하고<br>AI에 바로 붙여넣으세요</p>
+</header>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(0)">공시·보고서</button>
+    <button class="tab" onclick="switchTab(1)">애널리스트 리포트</button>
+    <button class="tab" onclick="switchTab(2)">여러 자료 통합</button>
+    <button class="tab" onclick="switchTab(3)">뉴스 분석</button>
+    <button class="tab" onclick="switchTab(4)">산업 리서치</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- 탭 0: 공시·사업보고서 -->
+  <div class="panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">공시·사업보고서 요약</div>
+      <div class="card-desc">DART에서 복사한 공시 내용을 아래 프롬프트 하단에 붙여넣으세요.</div>
+      <div class="prompt-box" id="prompt-0">당신은 기업 분석 전문가입니다.
+아래 공시 내용을 읽고 다음을 정리해주세요.
+
+① 핵심 내용 3줄 요약
+② 투자자가 주의해야 할 리스크 2가지
+③ 긍정적으로 해석할 수 있는 부분 1가지
+
+<span class="placeholder">[ 여기에 공시 내용을 붙여넣으세요 ]</span></div>
+      <button class="copy-btn" onclick="copyPrompt(0, this)">
+        📋 프롬프트 복사하기
+      </button>
+      <div class="ai-badge">ChatGPT · Gemini · Claude 모두 사용 가능</div>
+    </div>
+    <div class="tip-box">
+      <strong>💡 어디서 공시를 찾나요?</strong>
+      DART (dart.fss.or.kr) → 검색창에 기업명 입력 → 사업보고서 또는 주요사항보고서 선택 → 관련 섹션 텍스트 복사
+    </div>
+  </div>
+
+  <!-- 탭 1: 애널리스트 리포트 -->
+  <div class="panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">애널리스트 리포트 핵심 뽑기</div>
+      <div class="card-desc">증권사 리포트 내용을 복사해서 아래 프롬프트 하단에 붙여넣으세요.</div>
+      <div class="prompt-box" id="prompt-1">증권사 애널리스트 리포트를 분석해주세요.
+
+① 목표주가와 투자의견 (매수·중립·매도)
+② 핵심 투자 포인트 3가지
+③ 주요 리스크 요인 2가지
+④ 지금 당장 확인해야 할 핵심 지표 1가지
+
+<span class="placeholder">[ 여기에 리포트 내용을 붙여넣으세요 ]</span></div>
+      <button class="copy-btn" onclick="copyPrompt(1, this)">
+        📋 프롬프트 복사하기
+      </button>
+      <div class="ai-badge">ChatGPT · Gemini · Claude 모두 사용 가능</div>
+    </div>
+    <div class="tip-box">
+      <strong>💡 리포트는 어디서 찾나요?</strong>
+      네이버 증권 → 관심 종목 → 리서치 탭 / 또는 각 증권사 앱 → 리서치센터 → 무료 리포트 다운로드
+    </div>
+  </div>
+
+  <!-- 탭 2: 여러 자료 통합 -->
+  <div class="panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">여러 자료 통합 정리</div>
+      <div class="card-desc">같은 기업·산업에 대한 자료 2~3개를 한꺼번에 분석할 때 사용하세요.</div>
+      <div class="prompt-box" id="prompt-2">아래 자료들은 같은 기업/산업에 대한 서로 다른 분석입니다.
+내용을 읽고 다음을 정리해주세요.
+
+① 자료들의 공통된 핵심 주장
+② 자료 간 의견이 엇갈리는 부분
+③ 종합했을 때 투자 판단에 어떤 시사점이 있는가
+
+[자료1]
+<span class="placeholder">( 첫 번째 자료 내용 붙여넣기 )</span>
+
+[자료2]
+<span class="placeholder">( 두 번째 자료 내용 붙여넣기 )</span>
+
+[자료3] ← 없으면 삭제하세요
+<span class="placeholder">( 세 번째 자료 내용 붙여넣기 )</span></div>
+      <button class="copy-btn" onclick="copyPrompt(2, this)">
+        📋 프롬프트 복사하기
+      </button>
+      <div class="ai-badge">ChatGPT · Gemini · Claude 모두 사용 가능</div>
+    </div>
+    <div class="tip-box">
+      <strong>💡 이럴 때 유용합니다</strong>
+      A 증권사는 매수, B 증권사는 중립 → 왜 다른지, 어느 쪽이 더 설득력 있는지 AI가 정리해줍니다.
+    </div>
+  </div>
+
+  <!-- 탭 3: 뉴스 분석 -->
+  <div class="panel" id="panel-3">
+    <div class="card">
+      <div class="card-title">뉴스 투자 인사이트 분석</div>
+      <div class="card-desc">뉴스 기사를 복사해서 아래 프롬프트 하단에 붙여넣으세요.</div>
+      <div class="prompt-box" id="prompt-3">투자자 관점에서 아래 뉴스를 분석해주세요.
+
+① 이 뉴스가 어떤 산업·기업에 영향을 미치는가
+② 수혜가 예상되는 기업과 피해가 예상되는 기업 각 1~2개
+③ 단기 영향 (1~3개월)과 장기 영향 (1년 이상) 구분
+
+<span class="placeholder">[ 여기에 뉴스 내용을 붙여넣으세요 ]</span></div>
+      <button class="copy-btn" onclick="copyPrompt(3, this)">
+        📋 프롬프트 복사하기
+      </button>
+      <div class="ai-badge">ChatGPT · Gemini · Claude 모두 사용 가능</div>
+    </div>
+    <div class="tip-box">
+      <strong>💡 최신 뉴스라면 Gemini가 편리합니다</strong>
+      Gemini는 구글 검색이 연동되어 있어 오늘 뉴스를 직접 입력하지 않아도 분석이 가능합니다.
+    </div>
+  </div>
+
+  <!-- 탭 4: 산업 리서치 -->
+  <div class="panel" id="panel-4">
+    <div class="card">
+      <div class="card-title">관심 산업 리서치</div>
+      <div class="card-desc">산업명을 바꿔서 사용하세요. 자료를 붙여넣지 않아도 됩니다.</div>
+      <div class="prompt-box" id="prompt-4">당신은 산업 분석 전문가입니다.
+<span class="placeholder">[ 반도체 / 2차전지 / 바이오 / 금융 / 부동산 ]</span> 산업에 대해
+투자자 관점에서 분석해주세요.
+
+① 현재 업황 요약 (3줄 이내)
+② 주요 기업과 경쟁 구도
+③ 향후 6~12개월 주목해야 할 변수 2가지
+④ 투자할 때 가장 중요하게 봐야 할 지표 1가지
+
+※ 최신 정보는 직접 확인이 필요할 수 있습니다.</div>
+      <button class="copy-btn" onclick="copyPrompt(4, this)">
+        📋 프롬프트 복사하기
+      </button>
+      <div class="ai-badge">ChatGPT · Gemini · Claude 모두 사용 가능</div>
+    </div>
+    <div class="tip-box">
+      <strong>💡 사용 방법</strong>
+      프롬프트 복사 후 AI에 붙여넣기 → 대괄호 [ ] 부분을 원하는 산업명으로 바꾸면 됩니다.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  본 자료는 교육 목적으로 제작되었으며, 실제 투자 판단은 본인 책임 하에 이루어져야 합니다.<br>
+  2026 서울 리[Re]테크 심화과정 · IdentiFi 정원준 CFP
+</footer>
+
+<script>
+  const prompts = [
+    `당신은 기업 분석 전문가입니다.\n아래 공시 내용을 읽고 다음을 정리해주세요.\n\n① 핵심 내용 3줄 요약\n② 투자자가 주의해야 할 리스크 2가지\n③ 긍정적으로 해석할 수 있는 부분 1가지\n\n[ 여기에 공시 내용을 붙여넣으세요 ]`,
+    `증권사 애널리스트 리포트를 분석해주세요.\n\n① 목표주가와 투자의견 (매수·중립·매도)\n② 핵심 투자 포인트 3가지\n③ 주요 리스크 요인 2가지\n④ 지금 당장 확인해야 할 핵심 지표 1가지\n\n[ 여기에 리포트 내용을 붙여넣으세요 ]`,
+    `아래 자료들은 같은 기업/산업에 대한 서로 다른 분석입니다.\n내용을 읽고 다음을 정리해주세요.\n\n① 자료들의 공통된 핵심 주장\n② 자료 간 의견이 엇갈리는 부분\n③ 종합했을 때 투자 판단에 어떤 시사점이 있는가\n\n[자료1]\n( 첫 번째 자료 내용 붙여넣기 )\n\n[자료2]\n( 두 번째 자료 내용 붙여넣기 )\n\n[자료3] ← 없으면 삭제하세요\n( 세 번째 자료 내용 붙여넣기 )`,
+    `투자자 관점에서 아래 뉴스를 분석해주세요.\n\n① 이 뉴스가 어떤 산업·기업에 영향을 미치는가\n② 수혜가 예상되는 기업과 피해가 예상되는 기업 각 1~2개\n③ 단기 영향 (1~3개월)과 장기 영향 (1년 이상) 구분\n\n[ 여기에 뉴스 내용을 붙여넣으세요 ]`,
+    `당신은 산업 분석 전문가입니다.\n[ 반도체 / 2차전지 / 바이오 / 금융 / 부동산 ] 산업에 대해\n투자자 관점에서 분석해주세요.\n\n① 현재 업황 요약 (3줄 이내)\n② 주요 기업과 경쟁 구도\n③ 향후 6~12개월 주목해야 할 변수 2가지\n④ 투자할 때 가장 중요하게 봐야 할 지표 1가지\n\n※ 최신 정보는 직접 확인이 필요할 수 있습니다.`
+  ];
+
+  function switchTab(index) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.panel').forEach((p, i) => {
+      p.classList.toggle('active', i === index);
+    });
+  }
+
+  function copyPrompt(index, btn) {
+    navigator.clipboard.writeText(prompts[index]).then(() => {
+      btn.textContent = '✅ 복사됐습니다!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 프롬프트 복사하기';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = prompts[index];
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✅ 복사됐습니다!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 프롬프트 복사하기';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
