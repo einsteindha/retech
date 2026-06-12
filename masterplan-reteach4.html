@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>재무 마스터플랜 작성기 | 리[Re]테크 심화 4회차</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: #F0F2F5;
+      color: #1E2A3A;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    header {
+      background: #1E3A5F;
+      color: white;
+      padding: 20px 20px 18px;
+    }
+    header .label {
+      font-size: 12px;
+      color: #F5A623;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    header p {
+      font-size: 14px;
+      color: #A8C0D6;
+      margin-top: 7px;
+      line-height: 1.5;
+    }
+
+    .content {
+      padding: 16px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .step-card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .step-badge {
+      background: #1E3A5F;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1E3A5F;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 7px;
+    }
+    label .hint {
+      font-weight: 400;
+      color: #9CA3AF;
+      font-size: 13px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 8px;
+      padding: 13px 14px;
+      font-size: 17px;
+      font-family: inherit;
+      color: #1E2A3A;
+      background: #FAFAFA;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #1E3A5F;
+      background: white;
+    }
+
+    .input-suffix {
+      position: relative;
+    }
+    .input-suffix input {
+      padding-right: 52px;
+    }
+    .suffix-label {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: #6B7280;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #E5E7EB;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1E3A5F;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .slider-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1E3A5F;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    .net-asset-box {
+      background: #EEF4FF;
+      border: 1.5px solid #C7D7F0;
+      border-radius: 8px;
+      padding: 13px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+    }
+    .net-asset-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .net-asset-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E3A5F;
+    }
+    .net-asset-value.negative { color: #DC2626; }
+
+    .calc-btn {
+      width: 100%;
+      padding: 17px;
+      background: #F5A623;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 14px;
+    }
+    .calc-btn:active { transform: scale(0.97); }
+
+    /* Result section */
+    .result-section { display: none; }
+    .result-section.visible { display: block; }
+
+    .result-card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .result-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1E3A5F;
+      margin-bottom: 16px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .summary-item {
+      background: #F8F9FA;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .summary-item .s-label {
+      font-size: 12px;
+      color: #6B7280;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .summary-item .s-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1E3A5F;
+    }
+
+    .achieve-box {
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .achieve-box.success {
+      background: #F0FDF4;
+      border: 1.5px solid #86EFAC;
+    }
+    .achieve-box.fail {
+      background: #FEF2F2;
+      border: 1.5px solid #FECACA;
+    }
+    .achieve-box .a-emoji {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    .achieve-box .a-main {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1E2A3A;
+      margin-bottom: 4px;
+    }
+    .achieve-box .a-sub {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.6;
+    }
+    .achieve-box.success .a-main { color: #166534; }
+    .achieve-box.fail .a-main { color: #991B1B; }
+
+    .chart-wrap {
+      position: relative;
+      height: 220px;
+      margin-bottom: 8px;
+    }
+    .chart-note {
+      font-size: 12px;
+      color: #9CA3AF;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .declaration-area {
+      width: 100%;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 8px;
+      padding: 13px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #1E2A3A;
+      background: #FAFAFA;
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.7;
+    }
+    .declaration-area:focus {
+      outline: none;
+      border-color: #1E3A5F;
+      background: white;
+    }
+    .declaration-hint {
+      font-size: 12px;
+      color: #9CA3AF;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    .save-box {
+      background: #FFF8EC;
+      border: 1px solid #F5A623;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #92400E;
+      line-height: 1.7;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .save-box strong {
+      display: block;
+      color: #D97706;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 14px;
+      background: white;
+      color: #6B7280;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+
+    .warning-box {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #7F1D1D;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .warning-box strong {
+      display: block;
+      color: #DC2626;
+      margin-bottom: 4px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 12px;
+      color: #9CA3AF;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="label">2026 서울 리[Re]테크 심화 4회차</div>
+  <h1>재무 마스터플랜<br>작성기</h1>
+  <p>내 숫자로 만드는 5년 로드맵</p>
+</header>
+
+<div class="content">
+
+  <!-- STEP 1 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 1</span>
+      <span class="step-title">나의 재무 목표</span>
+    </div>
+
+    <div class="field">
+      <label for="goal-name">목표 이름 <span class="hint">(예: 전세 보증금 마련)</span></label>
+      <input type="text" id="goal-name" placeholder="목표를 한 줄로 적어주세요" />
+    </div>
+
+    <div class="field">
+      <label for="goal-amount">목표 금액</label>
+      <div class="input-suffix">
+        <input type="number" id="goal-amount" placeholder="0" min="0" inputmode="numeric" />
+        <span class="suffix-label">만원</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>목표 기간 <span class="hint">(달성하고 싶은 연수)</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="goal-years" min="1" max="10" value="5"
+          oninput="document.getElementById('goal-years-val').textContent=this.value+'년'" />
+        <span class="slider-value" id="goal-years-val">5년</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 2</span>
+      <span class="step-title">현재 나의 현황</span>
+    </div>
+
+    <div class="field">
+      <label for="asset-total">자산 합계 <span class="hint">(예금·주식·연금 등)</span></label>
+      <div class="input-suffix">
+        <input type="number" id="asset-total" placeholder="0" min="0" inputmode="numeric"
+          oninput="calcNetAsset()" />
+        <span class="suffix-label">만원</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="debt-total">부채 합계 <span class="hint">(대출·카드론 등, 없으면 0)</span></label>
+      <div class="input-suffix">
+        <input type="number" id="debt-total" placeholder="0" min="0" inputmode="numeric"
+          oninput="calcNetAsset()" />
+        <span class="suffix-label">만원</span>
+      </div>
+    </div>
+
+    <div class="net-asset-box">
+      <span class="net-asset-label">현재 순자산 (자산 - 부채)</span>
+      <span class="net-asset-value" id="net-asset-display">0 만원</span>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 3</span>
+      <span class="step-title">월별 실행 계획</span>
+    </div>
+
+    <div class="field">
+      <label for="monthly-save">월 저축·투자 가능 금액</label>
+      <div class="input-suffix">
+        <input type="number" id="monthly-save" placeholder="0" min="0" inputmode="numeric" />
+        <span class="suffix-label">만원</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>예상 연 수익률 <span class="hint">(잘 모르면 기본값 4% 유지)</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="annual-rate" min="0" max="12" value="4" step="0.5"
+          oninput="document.getElementById('annual-rate-val').textContent=this.value+'%'" />
+        <span class="slider-value" id="annual-rate-val">4%</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">내 로드맵 만들기</button>
+
+  <!-- 결과 영역 -->
+  <div class="result-section" id="result-section">
+
+    <!-- 달성 여부 -->
+    <div class="result-card">
+      <div class="result-title" id="result-goal-title">목표 달성 예측</div>
+
+      <div class="achieve-box" id="achieve-box">
+        <div class="a-emoji" id="achieve-emoji"></div>
+        <div class="a-main" id="achieve-main"></div>
+        <div class="a-sub" id="achieve-sub"></div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="s-label">현재 순자산</div>
+          <div class="s-value" id="r-net"></div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">월 적립액</div>
+          <div class="s-value" id="r-monthly"></div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">목표 금액</div>
+          <div class="s-value" id="r-goal"></div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">적용 수익률</div>
+          <div class="s-value" id="r-rate"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 차트 -->
+    <div class="result-card">
+      <div class="result-title">연도별 자산 로드맵</div>
+      <div class="chart-wrap">
+        <canvas id="roadmap-chart"></canvas>
+      </div>
+      <div class="chart-note">주황 점선: 목표 금액 기준선</div>
+    </div>
+
+    <!-- 투자 선언문 -->
+    <div class="result-card">
+      <div class="result-title">나만의 투자 선언</div>
+      <textarea class="declaration-area" id="declaration"
+        placeholder="예) 화제 종목은 2주 후 재검토한다.&#10;매수 전 체크리스트 5항목을 반드시 확인한다.&#10;월급날 자동이체로 투자금을 먼저 확보한다."></textarea>
+      <div class="declaration-hint">내가 지킬 수 있는 원칙을 자유롭게 적어보세요. 스크린샷으로 저장하면 내 것이 됩니다.</div>
+    </div>
+
+    <!-- 저장 안내 -->
+    <div class="save-box">
+      <strong>이 화면을 저장하세요</strong>
+      스크린샷을 찍어 갤러리·메모장에 보관하세요.<br>
+      분기마다 한 번씩 꺼내 보며 숫자를 업데이트하면 됩니다.
+    </div>
+
+    <div class="warning-box">
+      <strong>꼭 확인하세요</strong>
+      이 도구는 단순 복리 시뮬레이션입니다. 실제 수익률은 시장 상황에 따라 다르며,
+      원금 손실이 발생할 수 있습니다. 모든 투자 결정은 본인 책임입니다.
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↩ 다시 입력하기</button>
+
+  </div>
+
+</div>
+
+<footer>
+  본 도구는 교육 목적으로 제작되었으며, 실제 금융 상품과 다를 수 있습니다.<br>
+  모든 투자 결정과 그에 따른 결과는 본인 책임입니다.<br><br>
+  2026 서울 리[Re]테크 심화과정 · IdentiFi 정원준 CFP
+</footer>
+
+<script>
+  let chartInstance = null;
+
+  function calcNetAsset() {
+    const asset = parseFloat(document.getElementById('asset-total').value) || 0;
+    const debt  = parseFloat(document.getElementById('debt-total').value)  || 0;
+    const net   = asset - debt;
+    const el    = document.getElementById('net-asset-display');
+    el.textContent = fmt(net) + ' 만원';
+    el.className   = 'net-asset-value' + (net < 0 ? ' negative' : '');
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('ko-KR');
+  }
+
+  function fmtMan(n) {
+    const abs = Math.abs(Math.round(n));
+    if (abs >= 10000) {
+      const uk  = Math.floor(abs / 10000);
+      const man = Math.round((abs % 10000));
+      return (n < 0 ? '-' : '') + (man > 0 ? uk + '억 ' + man : uk + '억') + ' 만원';
+    }
+    return (n < 0 ? '-' : '') + abs.toLocaleString('ko-KR') + ' 만원';
+  }
+
+  function calculate() {
+    const goalName    = document.getElementById('goal-name').value.trim() || '나의 재무 목표';
+    const goalAmount  = parseFloat(document.getElementById('goal-amount').value) || 0;
+    const goalYears   = parseInt(document.getElementById('goal-years').value);
+    const assetTotal  = parseFloat(document.getElementById('asset-total').value) || 0;
+    const debtTotal   = parseFloat(document.getElementById('debt-total').value)  || 0;
+    const netAsset    = assetTotal - debtTotal;
+    const monthlySave = parseFloat(document.getElementById('monthly-save').value) || 0;
+    const annualRate  = parseFloat(document.getElementById('annual-rate').value);
+
+    if (goalAmount <= 0) {
+      alert('목표 금액을 입력해주세요.');
+      document.getElementById('goal-amount').focus();
+      return;
+    }
+    if (monthlySave <= 0) {
+      alert('월 저축·투자 가능 금액을 입력해주세요.');
+      document.getElementById('monthly-save').focus();
+      return;
+    }
+
+    const monthlyRate = annualRate / 100 / 12;
+    const labels = [];
+    const data   = [];
+
+    for (let y = 1; y <= goalYears; y++) {
+      const n = y * 12;
+      let accumulated;
+      if (monthlyRate === 0) {
+        accumulated = netAsset + monthlySave * n;
+      } else {
+        const growth = Math.pow(1 + monthlyRate, n);
+        accumulated  = netAsset * growth + monthlySave * (growth - 1) / monthlyRate;
+      }
+      labels.push(y + '년 후');
+      data.push(Math.round(accumulated));
+    }
+
+    const finalAmount = data[data.length - 1];
+
+    // 달성 여부
+    let achieveYear = -1;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] >= goalAmount) { achieveYear = i + 1; break; }
+    }
+
+    // 결과 표시
+    document.getElementById('result-goal-title').textContent = '"' + goalName + '" 달성 예측';
+    document.getElementById('r-net').textContent     = fmtMan(netAsset);
+    document.getElementById('r-monthly').textContent = fmtMan(monthlySave) + '/월';
+    document.getElementById('r-goal').textContent    = fmtMan(goalAmount);
+    document.getElementById('r-rate').textContent    = annualRate + '% / 년';
+
+    const box   = document.getElementById('achieve-box');
+    const emoji = document.getElementById('achieve-emoji');
+    const main  = document.getElementById('achieve-main');
+    const sub   = document.getElementById('achieve-sub');
+
+    if (achieveYear > 0) {
+      box.className = 'achieve-box success';
+      emoji.textContent = '🎯';
+      main.textContent  = goalYears + '년 목표 안에 달성 가능합니다';
+      sub.textContent   = achieveYear + '년 후 목표 금액 도달 예상 · ' + goalYears + '년 후 예상 자산 ' + fmtMan(finalAmount);
+    } else {
+      // 추가 필요 금액 or 기간 계산
+      const n = goalYears * 12;
+      let needMonthly;
+      if (monthlyRate === 0) {
+        needMonthly = (goalAmount - netAsset) / n;
+      } else {
+        const growth  = Math.pow(1 + monthlyRate, n);
+        needMonthly   = (goalAmount - netAsset * growth) * monthlyRate / (growth - 1);
+      }
+      const shortfall = goalAmount - finalAmount;
+      const extraMonthly = Math.max(0, Math.round(needMonthly - monthlySave));
+
+      box.className = 'achieve-box fail';
+      emoji.textContent = '📌';
+      main.textContent  = goalYears + '년 안에 ' + fmtMan(shortfall) + ' 부족합니다';
+      sub.textContent   = goalYears + '년 후 예상 자산 ' + fmtMan(finalAmount) + '\n목표 달성을 위해 월 ' + fmt(extraMonthly) + '만원 추가 적립 또는 기간 연장이 필요합니다';
+    }
+
+    // 차트
+    renderChart(labels, data, goalAmount);
+
+    const resultEl = document.getElementById('result-section');
+    resultEl.classList.add('visible');
+    setTimeout(() => resultEl.scrollIntoView({ behavior: 'smooth' }), 100);
+  }
+
+  function renderChart(labels, data, goalAmount) {
+    if (chartInstance) { chartInstance.destroy(); }
+
+    const ctx = document.getElementById('roadmap-chart').getContext('2d');
+    const maxVal = Math.max(...data, goalAmount) * 1.15;
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '누적 자산',
+            data: data,
+            backgroundColor: data.map(v => v >= goalAmount ? '#22C55E' : '#1E3A5F'),
+            borderRadius: 6,
+            borderSkipped: false,
+          },
+          {
+            label: '목표 금액',
+            data: new Array(labels.length).fill(goalAmount),
+            type: 'line',
+            borderColor: '#F5A623',
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { font: { size: 12 }, boxWidth: 16 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const v = ctx.raw;
+                return ' ' + Math.round(v).toLocaleString('ko-KR') + ' 만원';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: maxVal,
+            ticks: {
+              callback: v => {
+                if (v >= 10000) return Math.round(v / 10000) + '억';
+                if (v >= 1000) return Math.round(v / 1000) + '천';
+                return v;
+              },
+              font: { size: 11 }
+            },
+            grid: { color: '#F3F4F6' }
+          },
+          x: {
+            ticks: { font: { size: 12 } },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  function resetAll() {
+    document.getElementById('goal-name').value    = '';
+    document.getElementById('goal-amount').value  = '';
+    document.getElementById('goal-years').value   = 5;
+    document.getElementById('goal-years-val').textContent = '5년';
+    document.getElementById('asset-total').value  = '';
+    document.getElementById('debt-total').value   = '';
+    document.getElementById('net-asset-display').textContent = '0 만원';
+    document.getElementById('net-asset-display').className  = 'net-asset-value';
+    document.getElementById('monthly-save').value = '';
+    document.getElementById('annual-rate').value  = 4;
+    document.getElementById('annual-rate-val').textContent  = '4%';
+    document.getElementById('declaration').value  = '';
+    document.getElementById('result-section').classList.remove('visible');
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
