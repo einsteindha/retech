@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디지털 금융 첫걸음 실습가이드</title>
+<style>
+  :root{
+    --navy:#1E3A5F;
+    --navy-light:#2C5282;
+    --orange:#F5A623;
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --text:#222831;
+    --sub:#5A6472;
+    --line:#E3E7EC;
+    --ok:#2E7D32;
+    --warn:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","맑은 고딕",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:17px;
+    line-height:1.55;
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:22px 18px 18px;
+    text-align:center;
+  }
+  header .badge{
+    display:inline-block;
+    background:var(--orange);
+    color:var(--navy);
+    font-weight:700;
+    font-size:13px;
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  header p{
+    margin:0;
+    font-size:14px;
+    color:#CBD8E8;
+  }
+  nav.tabs{
+    display:flex;
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:#fff;
+    border-bottom:2px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1;
+    padding:14px 4px;
+    border:none;
+    background:none;
+    font-size:15px;
+    font-weight:700;
+    color:var(--sub);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  nav.tabs button.active{
+    color:var(--navy);
+    border-bottom:3px solid var(--orange);
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:18px 16px 0;
+  }
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(30,58,95,0.06);
+  }
+  .card h2{
+    margin:0 0 10px;
+    font-size:19px;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h3{
+    font-size:16px;
+    color:var(--navy);
+    margin:14px 0 8px;
+  }
+  .card p{margin:6px 0;color:var(--text);}
+  .lead{
+    background:linear-gradient(135deg,var(--navy),var(--navy-light));
+    color:#fff;
+    border:none;
+  }
+  .lead h2{color:#fff;}
+  .lead p{color:#DCE6F2;}
+
+  /* 비교표 */
+  .compare-wrap{overflow-x:auto;margin:12px 0;}
+  table.compare{
+    border-collapse:collapse;
+    width:100%;
+    min-width:520px;
+    font-size:14.5px;
+  }
+  table.compare th, table.compare td{
+    border:1px solid var(--line);
+    padding:10px 8px;
+    text-align:left;
+    vertical-align:top;
+  }
+  table.compare th{
+    background:var(--navy);
+    color:#fff;
+    font-size:14px;
+  }
+  table.compare td.label{
+    background:#F0F3F7;
+    font-weight:700;
+    color:var(--navy);
+    white-space:nowrap;
+  }
+
+  /* 단계 체크리스트 */
+  .step{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .step:last-child{border-bottom:none;}
+  .step-num{
+    flex:0 0 30px;
+    height:30px;
+    border-radius:50%;
+    background:var(--orange);
+    color:var(--navy);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+  }
+  .step-body{flex:1;}
+  .step-body b{display:block;font-size:15.5px;color:var(--text);margin-bottom:2px;}
+  .step-body span{font-size:14px;color:var(--sub);}
+  .step input[type=checkbox]{
+    flex:0 0 24px;
+    width:24px;height:24px;
+    accent-color:var(--orange);
+    margin-top:4px;
+  }
+
+  .warn-box{
+    background:#FDF2F0;
+    border:1px solid #F5C6C0;
+    border-radius:10px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:14.5px;
+    color:#8B2E22;
+  }
+  .warn-box b{color:var(--warn);}
+
+  /* 업종 카드 */
+  .industry-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:8px;
+  }
+  @media(max-width:420px){.industry-grid{grid-template-columns:1fr;}}
+  .ind-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    background:#FCFCFD;
+  }
+  .ind-card .icon{font-size:26px;}
+  .ind-card h4{
+    margin:6px 0 4px;
+    font-size:15.5px;
+    color:var(--navy);
+  }
+  .ind-card ul{
+    margin:6px 0 0;
+    padding-left:18px;
+    font-size:13.5px;
+    color:var(--sub);
+  }
+  .ind-card ul li{margin-bottom:3px;}
+
+  /* 마이데이터 개념도 */
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin:14px 0;
+    text-align:center;
+  }
+  .flow .node{
+    background:#F0F3F7;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 12px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+    min-width:64px;
+  }
+  .flow .arrow{
+    font-size:20px;
+    color:var(--orange);
+    font-weight:900;
+  }
+  .flow .hub{
+    background:var(--orange);
+    color:var(--navy);
+    border:none;
+    padding:12px 16px;
+    font-size:14.5px;
+    border-radius:12px;
+  }
+  .flow .result{
+    background:var(--navy);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+  }
+
+  /* OX 진단 */
+  .ox-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    gap:10px;
+  }
+  .ox-item:last-child{border-bottom:none;}
+  .ox-item p{margin:0;font-size:15px;flex:1;}
+  .ox-btns{display:flex;gap:6px;flex:0 0 auto;}
+  .ox-btns button{
+    width:44px;height:40px;
+    border-radius:8px;
+    border:2px solid var(--line);
+    background:#fff;
+    font-weight:800;
+    font-size:15px;
+    color:var(--sub);
+    cursor:pointer;
+  }
+  .ox-btns button.sel-o{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .ox-btns button.sel-x{background:var(--warn);color:#fff;border-color:var(--warn);}
+
+  #ox-result{
+    margin-top:14px;
+    padding:16px;
+    border-radius:12px;
+    text-align:center;
+    font-weight:800;
+    font-size:16px;
+    display:none;
+  }
+  #ox-result.ok{background:#EAF4EC;color:var(--ok);}
+  #ox-result.mid{background:#FDF3E3;color:#946200;}
+  #ox-result.warn{background:#FDF2F0;color:var(--warn);}
+
+  button.check-btn{
+    display:block;
+    width:100%;
+    margin-top:14px;
+    padding:14px;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .guide-line{
+    background:#F0F6FF;
+    border-left:4px solid var(--navy-light);
+    padding:10px 12px;
+    border-radius:6px;
+    font-size:14px;
+    color:var(--navy-light);
+    margin-top:10px;
+  }
+
+  footer{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 40px;
+    font-size:12.5px;
+    color:var(--sub);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">서울 리[Re]테크 · 중급 1회차</span>
+  <h1>디지털 금융 첫걸음 실습가이드</h1>
+  <p>IdentiFi 정원준 CFP · 국가공인 신용상담사</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="t1">① 간편인증</button>
+  <button class="tab-btn" data-tab="t2">② 나의 금융지도</button>
+  <button class="tab-btn" data-tab="t3">③ 계좌·보안</button>
+</nav>
+
+<main>
+
+  <!-- ===== 모듈 1 ===== -->
+  <section class="panel active" id="t1">
+
+    <div class="card lead">
+      <h2>🔐 인증서란 무엇인가요?</h2>
+      <p>온라인에서 "이 거래를 요청한 사람이 진짜 나 맞습니다"를 증명해주는 디지털 신분증입니다. 도장이나 서명을 온라인에서 대신하는 역할이에요.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 공동인증서 · 금융인증서 · 간편인증 비교</h2>
+      <div class="compare-wrap">
+        <table class="compare">
+          <tr>
+            <th>구분</th>
+            <th>공동인증서<br><span style="font-weight:400;font-size:12px;">(옛 공인인증서)</span></th>
+            <th>금융인증서</th>
+            <th>간편인증<br><span style="font-weight:400;font-size:12px;">(카카오페이·PASS 등)</span></th>
+          </tr>
+          <tr>
+            <td class="label">저장 위치</td>
+            <td>내 스마트폰 · PC · USB</td>
+            <td>금융결제원 클라우드</td>
+            <td>발급사(카카오·통신사 등) 서버</td>
+          </tr>
+          <tr>
+            <td class="label">유효기간</td>
+            <td>1년(매년 갱신)</td>
+            <td>3년</td>
+            <td>보통 3년</td>
+          </tr>
+          <tr>
+            <td class="label">장점</td>
+            <td>여러 기관에서 두루 사용</td>
+            <td>클라우드 저장이라 기기 변경에 강함, 발급 간편</td>
+            <td>PIN·지문만으로 매우 간편</td>
+          </tr>
+          <tr>
+            <td class="label">단점</td>
+            <td>발급·갱신 절차 번거로움</td>
+            <td>아직 지원 안 하는 사이트 있음</td>
+            <td>가입한 서비스 안에서만 사용 가능</td>
+          </tr>
+        </table>
+      </div>
+      <div class="guide-line">★ 오늘은 이 중 가장 쉬운 <b>간편인증</b>을 실제 내 은행 앱에서 등록해봅니다.</div>
+    </div>
+
+    <div class="card">
+      <h2>📱 간편인증 등록 따라하기</h2>
+      <p style="color:var(--sub);font-size:14px;">지금 본인 스마트폰의 은행 앱을 켜고, 강사 설명을 들으며 아래 순서대로 직접 따라 해보세요. 완료할 때마다 체크하세요.</p>
+
+      <div class="step">
+        <input type="checkbox" id="s1-1">
+        <div class="step-num">1</div>
+        <div class="step-body"><b>내 은행 앱 실행</b><span>이미 설치되어 있다면 바로 실행, 없다면 공식 앱스토어에서 은행명으로 검색해 설치</span></div>
+      </div>
+      <div class="step">
+        <input type="checkbox" id="s1-2">
+        <div class="step-num">2</div>
+        <div class="step-body"><b>'인증센터' 또는 '간편인증' 메뉴 찾기</b><span>보통 전체메뉴 → 인증/보안 안에 위치</span></div>
+      </div>
+      <div class="step">
+        <input type="checkbox" id="s1-3">
+        <div class="step-num">3</div>
+        <div class="step-body"><b>본인확인(휴대폰 인증)</b><span>본인 명의 휴대폰으로 문자 인증번호 받기</span></div>
+      </div>
+      <div class="step">
+        <input type="checkbox" id="s1-4">
+        <div class="step-num">4</div>
+        <div class="step-body"><b>PIN번호 또는 지문·얼굴 등록</b><span>다음부터는 이 PIN이나 생체인증으로 로그인·이체 가능</span></div>
+      </div>
+
+      <div class="warn-box">
+        <b>⚠ 꼭 지켜주세요</b><br>
+        · 앱은 반드시 공식 앱스토어(Play스토어 / App Store)에서만 설치<br>
+        · 인증번호·PIN은 가족에게도 알려주지 않기<br>
+        · 문자로 온 인증번호를 전화로 불러달라고 하면 100% 사기
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 모듈 2 ===== -->
+  <section class="panel" id="t2">
+
+    <div class="card lead">
+      <h2>🔗 마이데이터 · 오픈뱅킹이란?</h2>
+      <p>예전엔 은행마다 앱을 따로 켜서 잔액을 확인해야 했지만, 지금은 앱 하나로 내 모든 금융자산을 한눈에 볼 수 있어요. 그 원리를 그림으로 보면 이렇습니다.</p>
+      <div class="flow">
+        <div class="node">🏦 은행</div>
+        <div class="node">📈 증권사</div>
+        <div class="node">🛡 보험사</div>
+        <div class="arrow">→</div>
+        <div class="hub">마이데이터<br>앱 (내 동의)</div>
+        <div class="arrow">→</div>
+        <div class="result">내 자산<br>한 화면 조회</div>
+      </div>
+      <p style="font-size:13.5px;color:#DCE6F2;">2025.6월부터는 금융사를 하나하나 고르지 않고 '업권'만 선택해도 전체 자산이 한 번에 연결됩니다. 2025.11월부터는 은행 창구에서도 마이데이터·오픈뱅킹 연결을 도와드려요.</p>
+    </div>
+
+    <div class="card">
+      <h2>🗺 나의 금융생활 지도</h2>
+      <p style="color:var(--sub);font-size:14px;">업종마다 앱의 역할이 다릅니다. 아래 4개 업종 대표 기능을 확인해보세요.</p>
+
+      <div class="industry-grid">
+        <div class="ind-card">
+          <div class="icon">🏦</div>
+          <h4>은행</h4>
+          <ul>
+            <li>잔액·거래내역 조회</li>
+            <li>이체·자동이체</li>
+            <li>간편인증 등록</li>
+          </ul>
+        </div>
+        <div class="ind-card">
+          <div class="icon">📈</div>
+          <h4>증권사</h4>
+          <ul>
+            <li>비대면 계좌개설</li>
+            <li>주식·펀드 주문</li>
+            <li>잔고·수익률 조회</li>
+          </ul>
+        </div>
+        <div class="ind-card">
+          <div class="icon">🛡</div>
+          <h4>보험사</h4>
+          <ul>
+            <li>보험금 청구(사진 업로드)</li>
+            <li>보장분석(가입내역 한눈에)</li>
+            <li>실시간 청구 진행조회</li>
+          </ul>
+        </div>
+        <div class="ind-card">
+          <div class="icon">🚗</div>
+          <h4>캐피탈</h4>
+          <ul>
+            <li>1분 한도조회(신용점수 무영향)</li>
+            <li>오토론·오토리스</li>
+            <li>전자계약</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 모듈 3 ===== -->
+  <section class="panel" id="t3">
+
+    <div class="card">
+      <h2>🆕 비대면 계좌개설, 왜 안전할까?</h2>
+      <p style="color:var(--sub);font-size:14px;">직원과 마주 앉지 않아도, 아래 단계를 거치며 본인 확인을 이중 삼중으로 하기 때문에 안전합니다.</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body"><b>신분증 촬영</b><span>주민등록증·운전면허증을 스마트폰 카메라로 촬영해 진위 확인</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body"><b>영상통화 또는 기존계좌 인증</b><span>얼굴과 신분증을 대조하거나, 이미 갖고 있는 계좌로 1원을 보내 본인 확인</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body"><b>계좌 개설 완료</b><span>모든 확인이 끝나면 바로 계좌 사용 가능</span></div>
+      </div>
+
+      <div class="guide-line">★ 실제로 내 증권사 앱에 '비대면 계좌개설' 메뉴가 있는지 지금 함께 찾아봅시다.</div>
+    </div>
+
+    <div class="card">
+      <h2>💳 나의 이체한도, 알고 계신가요?</h2>
+      <p>은행 앱 → 전체메뉴 → '한도조회/변경' 메뉴에서 1회·1일 이체한도를 확인하고 필요시 낮출 수 있습니다. 한도를 낮게 설정해두면 혹시 사기를 당해도 피해 규모를 줄일 수 있어요.</p>
+      <div class="warn-box">
+        <b>ⓘ 참고</b><br>
+        100만원 이상 입금되면 30분간 ATM 인출·이체가 지연되는 '지연인출제도'가 자동으로 적용됩니다(은행 창구는 즉시 가능).
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>✅ 나의 디지털 금융 보안 자가진단</h2>
+      <p style="color:var(--sub);font-size:14px;">솔직하게 O/X로 체크해보세요.</p>
+
+      <div id="ox-list"></div>
+
+      <button class="check-btn" onclick="calcScore()">결과 확인하기</button>
+      <div id="ox-result"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  본 실습가이드는 교육 목적으로 제공되며, 실제 금융 앱 화면·절차는 기관별로 다를 수 있습니다.<br>
+  정확한 이용 방법은 해당 금융회사 고객센터를 통해 확인하시기 바랍니다.<br><br>
+  IdentiFi 정원준 CFP · 국가공인 신용상담사 &nbsp;|&nbsp; 서울 리[Re]테크 2026 하반기 중급과정
+</footer>
+
+<script>
+  // 탭 전환
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  // 체크박스 상태 localStorage 저장 (per-viewer 편의용)
+  document.querySelectorAll('.step input[type=checkbox]').forEach(cb=>{
+    try{
+      const saved = localStorage.getItem('dgf_'+cb.id);
+      if(saved==='1') cb.checked = true;
+    }catch(e){}
+    cb.addEventListener('change',()=>{
+      try{ localStorage.setItem('dgf_'+cb.id, cb.checked ? '1':'0'); }catch(e){}
+    });
+  });
+
+  // OX 진단 문항
+  const oxQuestions = [
+    "나는 간편인증(또는 인증서)을 등록했다",
+    "나는 내 계좌의 이체한도를 알고 있다",
+    "출처를 모르는 링크나 앱은 설치하지 않는다",
+    "전화로 계좌번호·인증번호를 알려달라고 하면 절대 알려주지 않는다",
+    "공공기관을 사칭한 전화·문자는 먼저 의심하고 확인한다",
+    "은행 비밀번호를 다른 곳과 다르게 관리한다",
+    "스마트폰에 화면 잠금(비밀번호·지문)을 설정해 두었다",
+    "의심스러운 거래가 있으면 신고 방법(경찰청 112, 금감원 1332)을 알고 있다"
+  ];
+  const oxList = document.getElementById('ox-list');
+  let oxAnswers = {};
+
+  oxQuestions.forEach((q,i)=>{
+    const row = document.createElement('div');
+    row.className='ox-item';
+    row.innerHTML = `
+      <p>${i+1}. ${q}</p>
+      <div class="ox-btns">
+        <button data-i="${i}" data-v="O">O</button>
+        <button data-i="${i}" data-v="X">X</button>
+      </div>`;
+    oxList.appendChild(row);
+  });
+
+  oxList.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const i = btn.dataset.i, v = btn.dataset.v;
+      oxAnswers[i]=v;
+      const siblings = oxList.querySelectorAll(`button[data-i="${i}"]`);
+      siblings.forEach(s=>{s.classList.remove('sel-o','sel-x');});
+      btn.classList.add(v==='O' ? 'sel-o':'sel-x');
+    });
+  });
+
+  function calcScore(){
+    const total = oxQuestions.length;
+    const answered = Object.keys(oxAnswers).length;
+    if(answered < total){
+      alert('아직 응답하지 않은 문항이 있어요. 모두 O/X로 체크해주세요.');
+      return;
+    }
+    const oCount = Object.values(oxAnswers).filter(v=>v==='O').length;
+    const box = document.getElementById('ox-result');
+    box.style.display='block';
+    if(oCount>=6){
+      box.className='ok';
+      box.innerHTML = `👍 ${oCount}/${total}개 — 안전 수준입니다! 지금처럼 잘 지켜주세요.`;
+    }else if(oCount>=3){
+      box.className='mid';
+      box.innerHTML = `🔎 ${oCount}/${total}개 — 보통입니다. 오늘 배운 간편인증·이체한도 설정부터 챙겨보세요.`;
+    }else{
+      box.className='warn';
+      box.innerHTML = `⚠ ${oCount}/${total}개 — 점검이 필요해요. 오늘 실습한 내용을 집에서 꼭 다시 해보세요.`;
+    }
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+</script>
+
+</body>
+</html>
