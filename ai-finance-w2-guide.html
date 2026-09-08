@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 재테크 도구 실습가이드</title>
+<style>
+  :root{
+    --navy:#1E3A5F;
+    --navy-light:#2C5282;
+    --orange:#F5A623;
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --text:#222831;
+    --sub:#5A6472;
+    --line:#E3E7EC;
+    --ok:#2E7D32;
+    --warn:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","맑은 고딕",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:17px;
+    line-height:1.55;
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:22px 18px 18px;
+    text-align:center;
+  }
+  header .badge{
+    display:inline-block;
+    background:var(--orange);
+    color:var(--navy);
+    font-weight:700;
+    font-size:13px;
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  header p{
+    margin:0;
+    font-size:14px;
+    color:#CBD8E8;
+  }
+  nav.tabs{
+    display:flex;
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:#fff;
+    border-bottom:2px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1;
+    padding:14px 4px;
+    border:none;
+    background:none;
+    font-size:15px;
+    font-weight:700;
+    color:var(--sub);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  nav.tabs button.active{
+    color:var(--navy);
+    border-bottom:3px solid var(--orange);
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:18px 16px 0;
+  }
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(30,58,95,0.06);
+  }
+  .card h2{
+    margin:0 0 10px;
+    font-size:19px;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h3{
+    font-size:16px;
+    color:var(--navy);
+    margin:14px 0 8px;
+  }
+  .card p{margin:6px 0;color:var(--text);}
+  .lead{
+    background:linear-gradient(135deg,var(--navy),var(--navy-light));
+    color:#fff;
+    border:none;
+  }
+  .lead h2{color:#fff;}
+  .lead p{color:#DCE6F2;}
+
+  /* 비교표 */
+  .compare-wrap{overflow-x:auto;margin:12px 0;}
+  table.compare{
+    border-collapse:collapse;
+    width:100%;
+    min-width:480px;
+    font-size:14px;
+  }
+  table.compare th, table.compare td{
+    border:1px solid var(--line);
+    padding:9px 8px;
+    text-align:center;
+    vertical-align:top;
+  }
+  table.compare th{
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+  }
+  table.compare td.label{
+    background:#F0F3F7;
+    font-weight:700;
+    color:var(--navy);
+  }
+
+  /* 체크리스트 */
+  .step{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .step:last-child{border-bottom:none;}
+  .step-num{
+    flex:0 0 30px;
+    height:30px;
+    border-radius:50%;
+    background:var(--orange);
+    color:var(--navy);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+  }
+  .step-body{flex:1;}
+  .step-body b{display:block;font-size:15.5px;color:var(--text);margin-bottom:2px;}
+  .step-body span{font-size:13.5px;color:var(--sub);}
+  .step-body input.memo{
+    margin-top:8px;
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:14px;
+    color:var(--text);
+    background:#FCFCFD;
+  }
+  .step input[type=checkbox]{
+    flex:0 0 26px;
+    width:26px;height:26px;
+    accent-color:var(--orange);
+    margin-top:4px;
+  }
+
+  .warn-box{
+    background:#FDF2F0;
+    border:1px solid #F5C6C0;
+    border-radius:10px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:14.5px;
+    color:#8B2E22;
+  }
+  .warn-box b{color:var(--warn);}
+
+  .guide-line{
+    background:#F0F6FF;
+    border-left:4px solid var(--navy-light);
+    padding:10px 12px;
+    border-radius:6px;
+    font-size:14px;
+    color:var(--navy-light);
+    margin-top:10px;
+  }
+
+  /* 체크 결과 */
+  #check-result{
+    margin-top:14px;
+    padding:16px;
+    border-radius:12px;
+    text-align:center;
+    font-weight:800;
+    font-size:16px;
+    background:#F0F3F7;
+    color:var(--navy);
+    display:none;
+  }
+
+  button.check-btn{
+    display:block;
+    width:100%;
+    margin-top:14px;
+    padding:14px;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  /* 프롬프트 카드 */
+  .prompt-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:14px;
+    background:#FCFCFD;
+  }
+  .prompt-card h4{
+    margin:0 0 8px;
+    font-size:15px;
+    color:var(--navy);
+  }
+  .prompt-box{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px;
+    font-size:14.5px;
+    color:var(--text);
+    white-space:pre-wrap;
+  }
+  .copy-btn{
+    margin-top:10px;
+    width:100%;
+    padding:12px;
+    border:2px solid var(--navy);
+    background:#fff;
+    color:var(--navy);
+    border-radius:8px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .copy-btn.copied{
+    background:var(--ok);
+    border-color:var(--ok);
+    color:#fff;
+  }
+
+  footer{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 40px;
+    font-size:12.5px;
+    color:var(--sub);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">서울 리[Re]테크 · 중급 2회차</span>
+  <h1>AI 재테크 도구 실습가이드</h1>
+  <p>IdentiFi 정원준 CFP · 국가공인 신용상담사</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="t1">① 내 증권앱 AI기능</button>
+  <button class="tab-btn" data-tab="t2">② AI에게 물어보기</button>
+</nav>
+
+<main>
+
+  <!-- ===== 탭1: 내 증권앱 속 AI 기능 찾기 ===== -->
+  <section class="panel active" id="t1">
+
+    <div class="card lead">
+      <h2>📱 내 계좌에도 AI가 있을까요?</h2>
+      <p>지금 본인의 증권사 앱(또는 은행 앱)을 실행해서, 오늘 배운 AI·자동화 서비스가 실제로 있는지 하나씩 찾아보세요. 있으면 체크하고, 화면에 뭐라고 쓰여 있는지 간단히 메모해두세요.</p>
+    </div>
+
+    <div class="card">
+      <h2>✅ 내 증권앱 AI 기능 체크리스트</h2>
+
+      <div class="step">
+        <input type="checkbox" id="c1">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <b>로보어드바이저 / 자문·일임 서비스</b>
+          <span>내 자산배분을 AI가 대신 설계·운용해주는 서비스. 앱 메뉴에서 '로보어드바이저', '자산관리', 'AI투자' 등으로 검색</span>
+          <input type="text" class="memo" placeholder="화면에서 본 이름을 적어보세요 (예: 로보Wrap)">
+        </div>
+      </div>
+
+      <div class="step">
+        <input type="checkbox" id="c2">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <b>연금계좌 적립식 자동매수</b>
+          <span>정해진 날짜에 자동으로 펀드·ETF를 사주는 기능. 연금저축·IRP 계좌 메뉴에서 '적립식 자동주문', '자동매수' 확인</span>
+          <input type="text" class="memo" placeholder="자동매수 주기를 확인해보세요 (매일/매주/매월)">
+        </div>
+      </div>
+
+      <div class="step">
+        <input type="checkbox" id="c3">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <b>연금계좌 자동배분·자동전환 서비스</b>
+          <span>지수 구간에 따라 자동으로 비중을 조절하거나(Swing), 목표수익률에 도달하면 안전자산으로 자동 전환(Keeping)하는 기능. 삼성증권 등 일부 증권사 연금상품(예: 안심플랜)에서 제공</span>
+          <input type="text" class="memo" placeholder="내 앱에도 있나요? 있다면 서비스명을 적어보세요">
+        </div>
+      </div>
+
+      <div class="step">
+        <input type="checkbox" id="c4">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <b>양도소득세 계산기</b>
+          <span>해외주식 등을 팔았을 때 내야 할 세금을 자동으로 계산해주는 기능. '세금계산기', '양도소득세' 메뉴 확인</span>
+          <input type="text" class="memo" placeholder="메모">
+        </div>
+      </div>
+
+      <div class="step">
+        <input type="checkbox" id="c5">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <b>금융소득종합과세 신고 지원 / 연간거래내역 조회</b>
+          <span>5월 종합소득세 신고에 필요한 연간 매매·배당·이자 내역을 정리해서 보여주는 기능. '연간거래내역', '세금신고자료' 메뉴 확인</span>
+          <input type="text" class="memo" placeholder="메모">
+        </div>
+      </div>
+
+      <button class="check-btn" onclick="calcCheck()">몇 개나 있었는지 확인하기</button>
+      <div id="check-result"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Keeping / Swing 서비스, 이렇게 작동합니다</h2>
+      <p style="color:var(--sub);font-size:14px;">일부 증권사 연금상품(예: 삼성증권 안심플랜)에서 제공하는 자동배분 화면 예시입니다.</p>
+      <div class="compare-wrap">
+        <table class="compare">
+          <tr>
+            <th>지수 구간</th>
+            <th>하한지수 이하</th>
+            <th>상한 미만 ~ 하한 초과</th>
+            <th>상한지수 이상</th>
+          </tr>
+          <tr>
+            <td class="label">Swing 배분</td>
+            <td>적립중인 펀드에만 투자</td>
+            <td>펀드·안전자산 50:50</td>
+            <td>안전자산에만 투자</td>
+          </tr>
+        </table>
+      </div>
+      <div class="guide-line">★ Keeping은 목표수익률에 도달하면 안전자산으로 자동 전환해 수익을 지켜주는 서비스입니다. 기준 지수는 보통 약정등록일 전일 KOSPI 종가입니다.</div>
+    </div>
+  </section>
+
+  <!-- ===== 탭2: AI에게 재무비서처럼 물어보기 ===== -->
+  <section class="panel" id="t2">
+
+    <div class="card lead">
+      <h2>🤖 AI를 나의 재무비서로 써봅시다</h2>
+      <p>아래 카드의 문구를 복사해서, 본인 스마트폰의 ChatGPT나 Gemini 앱에 그대로 붙여넣고 답을 받아보세요. [ ] 안의 내용은 본인 상황에 맞게 바꿔서 입력하세요.</p>
+    </div>
+
+    <div class="card">
+      <div class="prompt-card">
+        <h4>① 이번 달 지출, 어디서 줄일 수 있을까?</h4>
+        <div class="prompt-box" id="p1">최근 3개월 카드 사용 내역을 참고해서, 제가 줄일 수 있는 지출 항목 3가지와 그 이유를 알려주세요. 저는 [나이]대이고 월 소득은 [금액]만원입니다.</div>
+        <button class="copy-btn" onclick="copyPrompt('p1', this)">문구 복사하기</button>
+      </div>
+
+      <div class="prompt-card">
+        <h4>② 연금저축·IRP 세액공제, 얼마씩 넣어야 할까?</h4>
+        <div class="prompt-box" id="p2">저는 총급여가 [금액]만원인 직장인입니다. 연금저축과 IRP에 각각 얼마씩 넣으면 세액공제를 최대로 받을 수 있는지, 연금저축 600만원 한도와 합산 900만원 한도 기준으로 쉽게 설명해주세요.</div>
+        <button class="copy-btn" onclick="copyPrompt('p2', this)">문구 복사하기</button>
+      </div>
+
+      <div class="prompt-card">
+        <h4>③ 어려운 금융 용어, 쉽게 설명받기</h4>
+        <div class="prompt-box" id="p3">금융 용어 '[용어]'를 방금 은행에 다녀온 50대에게 설명하듯이, 아주 쉬운 말과 비유를 들어서 설명해주세요.</div>
+        <button class="copy-btn" onclick="copyPrompt('p3', this)">문구 복사하기</button>
+      </div>
+
+      <div class="warn-box">
+        <b>⚠ 꼭 기억하세요</b><br>
+        AI 답변은 참고용입니다. 세율·공제한도 등 숫자는 반드시 국세청(nts.go.kr)·금융회사 공식 자료로 다시 확인하세요. AI는 가끔 틀린 정보(할루시네이션)를 그럴듯하게 말합니다.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  본 실습가이드는 교육 목적으로 제공되며, 실제 금융 앱 화면·서비스명은 회사·시점에 따라 다를 수 있습니다.<br>
+  투자·세무 관련 최종 판단은 전문가 상담을 통해 확인하시기 바랍니다.<br><br>
+  IdentiFi 정원준 CFP · 국가공인 신용상담사 &nbsp;|&nbsp; 서울 리[Re]테크 2026 하반기 중급과정
+</footer>
+
+<script>
+  // 탭 전환
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  // 체크박스·메모 상태 localStorage 저장 (per-viewer 편의용)
+  document.querySelectorAll('.step input[type=checkbox]').forEach(cb=>{
+    try{
+      const saved = localStorage.getItem('ait_'+cb.id);
+      if(saved==='1') cb.checked = true;
+    }catch(e){}
+    cb.addEventListener('change',()=>{
+      try{ localStorage.setItem('ait_'+cb.id, cb.checked ? '1':'0'); }catch(e){}
+    });
+  });
+  document.querySelectorAll('.step .memo').forEach((inp,i)=>{
+    const key = 'ait_memo_'+i;
+    try{
+      const saved = localStorage.getItem(key);
+      if(saved) inp.value = saved;
+    }catch(e){}
+    inp.addEventListener('input',()=>{
+      try{ localStorage.setItem(key, inp.value); }catch(e){}
+    });
+  });
+
+  function calcCheck(){
+    const boxes = document.querySelectorAll('#t1 .step input[type=checkbox]');
+    const total = boxes.length;
+    const checked = Array.from(boxes).filter(b=>b.checked).length;
+    const box = document.getElementById('check-result');
+    box.style.display='block';
+    box.innerHTML = `내 계좌에서 ${checked} / ${total}개 기능을 찾았습니다. 없던 기능은 다음에 상담창구나 고객센터에 직접 물어보세요.`;
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  function copyPrompt(id, btn){
+    const text = document.getElementById(id).innerText;
+    const done = ()=>{
+      const old = btn.textContent;
+      btn.textContent = '복사 완료!';
+      btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1800);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+    }else{
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+</script>
+
+</body>
+</html>
