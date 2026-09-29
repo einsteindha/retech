@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 재무상태 진단 워크시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --orange:#F5A623; --ink:#1a1a1a; --sub:#555;
+    --line:#9aa8ba; --soft:#eef2f7; --soft2:#fdf3e1; --gray:#e6e6e6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:#d9dee5;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .toolbar{max-width:210mm;margin:16px auto 0;display:flex;justify-content:flex-end;gap:8px;padding:0 16px}
+  .toolbar button{font:700 16px 'Noto Sans KR',sans-serif;background:var(--navy);color:#fff;border:0;
+    border-radius:8px;padding:10px 18px;cursor:pointer}
+  .sheet{width:210mm;min-height:297mm;margin:12px auto 24px;background:#fff;padding:10mm 12mm 8mm;
+    box-shadow:0 4px 18px rgba(0,0,0,.18);display:flex;flex-direction:column}
+
+  /* 머리글 */
+  .head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--navy);padding-bottom:3mm}
+  .head .eyebrow{font-size:9.5pt;color:var(--orange);font-weight:700;letter-spacing:.02em}
+  .head h1{font-size:19pt;font-weight:900;color:var(--navy);line-height:1.25}
+  .who{font-size:10.5pt;text-align:right;line-height:1.9}
+  .who span{display:inline-block;border-bottom:1px solid var(--ink);width:34mm;margin-left:2mm}
+  .unit{font-size:9pt;color:var(--sub);text-align:right;margin-top:1.5mm}
+
+  h2{font-size:13.5pt;font-weight:900;color:#fff;background:var(--navy);padding:1.6mm 4mm;border-radius:2mm;
+    margin:3mm 0 1.8mm;display:flex;justify-content:space-between;align-items:center}
+  h2 small{font-size:9.5pt;font-weight:500;opacity:.9}
+
+  table{width:100%;border-collapse:collapse;font-size:11pt}
+  th,td{border:1px solid var(--line);padding:0 3mm;height:7.6mm;vertical-align:middle}
+  th{background:var(--soft);font-weight:700;color:var(--navy);height:7mm;font-size:10.5pt}
+  td.lbl{font-weight:400;width:auto;color:#a3abb5}
+  td.lbl em{display:block;font-style:normal;font-size:8.5pt;color:#bcc2ca;line-height:1.25}
+  td.amt{width:30mm}
+  tr.sum td{background:var(--soft2);font-weight:900}
+  tr.sum td.lbl{color:#8a5300}
+  td.gray{background:repeating-linear-gradient(135deg,#f3f3f3 0 2mm,#e9e9e9 2mm 4mm);color:#888;text-align:center;font-size:9.5pt}
+  td.zero{background:#f5f5f5;color:#999;text-align:center;font-size:10pt}
+  .grp{writing-mode:vertical-rl;text-orientation:upright;width:9mm;padding:0;text-align:center;
+    font-weight:900;color:#fff;font-size:10.5pt;letter-spacing:.1em}
+  .g-a{background:#3b6a9e}.g-d{background:#b5543c}.g-in{background:#2f7d5b}.g-out{background:#b5543c}.g-sv{background:#3b6a9e}
+
+  /* 재무상태표 */
+  .bs{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+  .net{margin-top:2.2mm;display:grid;grid-template-columns:1.25fr 1fr;gap:4mm}
+  .box{border:2px solid var(--navy);border-radius:2mm;display:flex;align-items:center;padding:0 4mm;height:10mm;font-size:11.5pt;font-weight:900;color:var(--navy)}
+  .box .f{font-size:9pt;font-weight:500;color:var(--sub);margin-left:2mm}
+  .box .fill{flex:1;border-bottom:1.5px solid var(--ink);margin:0 2mm;height:6mm}
+  .box.o{border-color:var(--orange);color:#8a5300}
+
+  /* 현금흐름표 */
+  .cf th.col{width:30mm}
+  .tip{font-size:9.5pt;color:var(--sub);margin-top:2mm;line-height:1.55;background:#fafafa;border-left:3px solid var(--orange);padding:1.5mm 3mm}
+  .tip b{color:var(--ink)}
+
+  .foot{margin-top:auto;padding-top:3mm;display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:var(--sub);border-top:1px solid var(--gray)}
+  .foot .brand{font-weight:700;color:var(--navy);font-size:9.5pt}
+  .qr{width:20mm;height:20mm;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-size:7.5pt;color:#888;line-height:1.3}
+  .foot-l{display:flex;flex-direction:column;gap:1mm}
+  .qrw{display:flex;flex-direction:column;align-items:center;gap:.5mm;font-size:8pt;font-weight:700;color:var(--navy)}
+  .qrimg{width:22mm;height:22mm;display:block}
+
+  @page{size:A4 portrait;margin:0}
+  @media print{
+    body{background:#fff}
+    .toolbar{display:none}
+    .sheet{margin:0;box-shadow:none;width:225.8mm;height:319.3mm;min-height:0;overflow:hidden;zoom:.93}
+  }
+  @media screen and (max-width:820px){
+    .toolbar{justify-content:center}
+    .sheet{width:auto;min-height:0;margin:12px 16px 24px;padding:18px 16px}
+    .bs,.net{grid-template-columns:1fr}
+    .head{flex-direction:column;align-items:flex-start;gap:8px}
+    .who{text-align:left}
+    table{font-size:16px}
+  }
+</style>
+</head>
+<body>
+<div class="toolbar"><button onclick="window.print()">🖨 인쇄 / PDF 저장</button></div>
+
+<div class="sheet">
+  <div class="head">
+    <div>
+      <div class="eyebrow">서울 리[Re]테크 · 내 손으로 완성하는 노후자금 로드맵 · 1주차</div>
+      <h1>나의 재무상태 진단 워크시트</h1>
+    </div>
+    <div>
+      <div class="who">이름<span></span><br>작성일<span></span></div>
+      <div class="unit">단위: 만원 · 대략적인 금액이면 충분합니다</div>
+    </div>
+  </div>
+
+  <!-- ① 재무상태표 -->
+  <h2>① 재무상태표 <small>지금 이 순간, 내가 가진 것과 갚을 것</small></h2>
+  <div class="bs">
+    <table>
+      <tr><th colspan="2">자산 (가진 것)</th><th>금액</th></tr>
+      <tr><td class="grp g-a" rowspan="6">자산</td><td class="lbl">현금·예적금<em>통장·CMA·적금</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">투자자산<em>주식·펀드·ETF</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">연금자산<em>연금저축·IRP·퇴직연금</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">부동산<em>거주 주택·전세보증금 포함</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">기타<em>자동차·보험 해지환급금 등</em></td><td class="amt"></td></tr>
+      <tr class="sum"><td class="lbl">총자산 Ⓐ</td><td class="amt"></td></tr>
+    </table>
+    <table>
+      <tr><th colspan="2">부채 (갚을 것)</th><th>금액</th></tr>
+      <tr><td class="grp g-d" rowspan="4">부채</td><td class="lbl">주택 관련 대출<em>주택담보·전세자금 대출</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">기타 대출<em>신용대출·마이너스통장</em></td><td class="amt"></td></tr>
+      <tr><td class="lbl">카드할부·기타<em>남은 할부금 등</em></td><td class="amt"></td></tr>
+      <tr class="sum"><td class="lbl">총부채 Ⓑ</td><td class="amt"></td></tr>
+    </table>
+  </div>
+  <div class="net">
+    <div class="box">순자산 = Ⓐ − Ⓑ<span class="fill"></span>만원</div>
+    <div class="box o">부동산 비중<span class="f">부동산÷Ⓐ</span><span class="fill"></span>%</div>
+  </div>
+
+  <!-- ② 현금흐름표 -->
+  <h2>② 연 현금흐름표 <small>1년 동안 들어오고 나가는 돈 (월 금액 × 12)</small></h2>
+  <table class="cf">
+    <tr><th colspan="2">항목</th><th class="col">지금 (은퇴 전)</th><th class="col">은퇴 후 (예상)</th></tr>
+    <tr><td class="grp g-in" rowspan="3">소득</td><td class="lbl">근로·사업소득<em>세후 실수령액 (본인+배우자)</em></td><td></td><td class="gray">연금→계산기</td></tr>
+    <tr><td class="lbl">기타소득<em>임대료·이자·용돈 등</em></td><td></td><td></td></tr>
+    <tr class="sum"><td class="lbl">연 소득 합계 ①</td><td></td><td class="gray">—</td></tr>
+
+    <tr><td class="grp g-out" rowspan="7">지출</td><td class="lbl">고정지출<em>주거·관리비, 대출 상환, 보험료, 통신비</em></td><td></td><td></td></tr>
+    <tr><td class="lbl">자녀 교육·양육비</td><td></td><td></td></tr>
+    <tr><td class="lbl">생활비<em>식비, 교통, 생활용품, 용돈</em></td><td></td><td></td></tr>
+    <tr><td class="lbl">의료·여가·경조사</td><td></td><td></td></tr>
+    <tr><td class="lbl">은퇴 후 추가 필요자금 ①<em>여가생활비: 취미, 여행 등</em></td><td class="gray">—</td><td></td></tr>
+    <tr><td class="lbl">은퇴 후 추가 필요자금 ②<em>건강보험료(지역가입자), 간병 등</em></td><td class="gray">—</td><td></td></tr>
+    <tr class="sum"><td class="lbl">연 지출 합계 ②</td><td></td><td style="background:#ffe7bd"></td></tr>
+
+    <tr><td class="grp g-sv" rowspan="3">저축</td><td class="lbl">저축 및 투자<em>예적금, 주식·펀드 적립</em></td><td></td><td class="zero">0</td></tr>
+    <tr><td class="lbl">연금저축·IRP 납입</td><td></td><td class="zero">0</td></tr>
+    <tr class="sum"><td class="lbl">연 저축·투자 합계 ③</td><td></td><td class="zero">0</td></tr>
+  </table>
+  <div class="net">
+    <div class="box">남는 돈 = ① − ② − ③<span class="fill"></span>만원</div>
+    <div class="box o">은퇴 후 연 생활비 ②<span class="fill"></span>만원</div>
+  </div>
+  <div class="tip">
+    <b>은퇴 후 칸 작성 요령</b> — 빼기: 자녀 교육비, 대출 상환(은퇴 전 완납 시), 출퇴근 비용 &nbsp;/&nbsp;
+    더하기: 추가 필요자금 ① 여가(취미·여행), ② 건강보험료(지역가입자 전환)·간병<br>
+    <b>→ ‘은퇴 후’ 칸의 지출을 은퇴 필요자금 계산기에 그대로 옮겨 적으세요.</b>
+  </div>
+
+  <div class="foot">
+    <div class="foot-l">
+      <span class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</span>
+      <span>본 워크시트는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. · 2026</span>
+    </div>
+    <div class="qrw"><img class="qrimg" src="data:image/png;base64,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" alt="은퇴 필요자금 계산기 QR"><span>은퇴자금 계산기</span></div>
+  </div>
+</div>
+</body>
+</html>
