@@ -46,6 +46,10 @@
   .seg button{flex:1;font:700 17px 'Noto Sans KR',sans-serif;padding:10px 4px;border:0;background:#fff;color:var(--sub);cursor:pointer}
   .seg button.on{background:var(--navy);color:#fff}
   .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .chk{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:var(--navy);background:var(--soft);border-radius:10px;padding:10px 12px;margin-bottom:12px;cursor:pointer}
+  .chk input{width:24px;height:24px;accent-color:var(--navy);flex-shrink:0}
+  .sp.off{opacity:.35}
+  .sp.off input{background:#f0f0f0}
   .pill{display:inline-block;background:var(--soft);color:var(--navy);font-weight:700;border-radius:999px;padding:2px 12px;font-size:15px}
 
   /* 지출표 */
@@ -201,8 +205,11 @@
     <div class="grid2">
       <div><label class="f">본인 연금 월액</label><div class="inp"><input type="number" inputmode="decimal" id="p1"><span class="u">만원</span></div></div>
       <div><label class="f">받기 시작하는 나이</label><div class="inp"><input type="number" inputmode="numeric" id="s1"><span class="u">세</span></div></div>
-      <div><label class="f">배우자 연금 월액 <small>(선택)</small></label><div class="inp"><input type="number" inputmode="decimal" id="p2"><span class="u">만원</span></div></div>
-      <div><label class="f">배우자 수령 시작 <small>(내 나이 기준)</small></label><div class="inp"><input type="number" inputmode="numeric" id="s2"><span class="u">세</span></div></div>
+    </div>
+    <label class="chk" style="margin-top:14px"><input type="checkbox" id="noSp"> 배우자 없음 (1인 가구)</label>
+    <div class="grid2">
+      <div class="sp"><label class="f">배우자 연금 월액</label><div class="inp"><input type="number" inputmode="decimal" id="p2"><span class="u">만원</span></div></div>
+      <div class="sp"><label class="f">배우자 수령 시작 <small>(내 나이 기준)</small></label><div class="inp"><input type="number" inputmode="numeric" id="s2"><span class="u">세</span></div></div>
     </div>
     <p class="note">1969년생 이후 국민연금 정상 수령 나이는 65세입니다. 공무원·사학·군인연금도 여기에 입력하세요.</p>
   </section>
@@ -448,7 +455,7 @@ function inputs(){
   else n = Math.max(1, Math.round(num('endAge') - a0));
   const E = EXP.reduce((s,x)=>s+num('a_'+x.k),0)/12;   // 연 생활비 → 월 환산
   return {cur,ret,n,e,sex,E,
-    P1:num('p1'), S1:has('s1')?num('s1'):65, P2:num('p2'), S2:has('s2')?num('s2'):65,
+    P1:num('p1'), S1:has('s1')?num('s1'):65, P2:$('noSp').checked?0:num('p2'), S2:has('s2')?num('s2'):65,
     g:has('g')?num('g'):3, rw:has('rw')?num('rw'):formulaRate().r, ra:has('ra')?num('ra'):formulaRate().r,
     A0:num('a0'), SAV:num('sav'), SEV:num('sev')};
 }
@@ -611,7 +618,7 @@ const FIELDS = ['cur','ret','endAge','p1','s1','p2','s2','g','ga','gb','rw','ra'
   ...EXP.filter(x=>!x.afterOnly).map(x=>'b_'+x.k), ...EXP.map(x=>'a_'+x.k)];
 function save(){
   try{
-    const d = {sex:state.sex, life:state.life, edited:state.edited, rwAuto, raAuto, v:{}};
+    const d = {sex:state.sex, life:state.life, edited:state.edited, rwAuto, raAuto, noSp:$('noSp').checked, v:{}};
     FIELDS.forEach(id=>d.v[id]=$(id).value);
     localStorage.setItem(KEY, JSON.stringify(d));
   }catch(e){}
@@ -621,12 +628,18 @@ function load(){
     const d = JSON.parse(localStorage.getItem(KEY)||'null');
     if(!d) return false;
     state.sex=d.sex||'M'; state.life=d.life||'p5'; state.edited=d.edited||{};
-    rwAuto = d.rwAuto!==false; raAuto = d.raAuto!==false;
+    rwAuto = d.rwAuto!==false; raAuto = d.raAuto!==false; $('noSp').checked = !!d.noSp;
     FIELDS.forEach(id=>{ if(d.v && d.v[id]!==undefined) $(id).value=d.v[id]; });
     EXP.forEach(e=>markEdited(e.k));
     return true;
   }catch(e){ return false; }
 }
+function paintSpouse(){
+  const off = $('noSp').checked;
+  document.querySelectorAll('.sp').forEach(el=>el.classList.toggle('off',off));
+  $('p2').disabled = off; $('s2').disabled = off;
+}
+$('noSp').addEventListener('change',()=>{ paintSpouse(); update(); });
 function defaults(){
   $('g').value='3'; $('ga').value='3'; $('gb').value='3'; $('s1').value='65';
 }
@@ -642,6 +655,7 @@ function sample(){
   $('a_fun').value=360; state.edited.fun=true;
   $('a_add1').value=240; state.edited.add1=true;
   $('a_add2').value=120; state.edited.add2=true;
+  $('noSp').checked=false; paintSpouse();
   EXP.forEach(e=>markEdited(e.k));
   applyAutoRates(); paintSeg(); update();
 }
@@ -652,11 +666,12 @@ $('btnReset').addEventListener('click',()=>{
   state.sex='M'; state.life='p5'; state.edited={}; rwAuto=raAuto=true;
   FIELDS.forEach(id=>{ if(!['ga','gb'].includes(id)) $(id).value=''; });
   EXP.forEach(e=>markEdited(e.k));
+  $('noSp').checked=false; paintSpouse();
   defaults(); applyAutoRates(); paintSeg(); update();
 });
 
 if(!load()){ defaults(); }
-applyAutoRates(); paintSeg(); update();
+paintSpouse(); applyAutoRates(); paintSeg(); update();
 </script>
 </body>
 </html>
