@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국민연금 수령시기 비교기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --navy2:#2d5282; --orange:#F5A623; --orange-d:#b87400;
+    --ink:#1b2430; --sub:#5b6573; --line:#d5dce5; --bg:#f3f5f8; --card:#fff;
+    --soft:#eef3f9; --warm:#fff6e6; --good:#1f8a5b; --warn:#d98a00; --bad:#c2412d;
+    --early:#c2412d; --normal:#1E3A5F; --late:#1f8a5b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',sans-serif;font-size:17px;line-height:1.6;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+  header{background:var(--navy);color:#fff;padding:22px 16px 20px}
+  header .in{max-width:720px;margin:0 auto}
+  header .eb{color:var(--orange);font-size:14px;font-weight:700}
+  header h1{font-size:26px;font-weight:900;line-height:1.3;margin:2px 0 6px}
+  header p{font-size:16px;opacity:.9}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+  .btn{font:700 16px 'Noto Sans KR',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .btn.ghost{border-color:var(--line);color:var(--sub)}
+
+  .card{background:var(--card);border-radius:14px;padding:20px 16px;margin-top:16px;box-shadow:0 1px 4px rgba(20,40,70,.08)}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .step .no{background:var(--navy);color:#fff;font-weight:900;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step h2{font-size:20px;font-weight:900;color:var(--navy)}
+  .desc{font-size:16px;color:var(--sub);margin-bottom:12px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label.f{display:block;font-size:16px;font-weight:700;margin-bottom:4px}
+  label.f small{font-weight:400;color:var(--sub)}
+  .inp{position:relative}
+  .inp input{width:100%;font:500 18px 'Noto Sans KR',sans-serif;padding:10px 52px 10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .inp input:focus{outline:none;border-color:var(--navy2)}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;pointer-events:none}
+  .seg{display:flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;min-width:0;font:700 17px 'Noto Sans KR',sans-serif;padding:10px 4px;border:0;background:#fff;color:var(--sub);cursor:pointer}
+  .seg button.on{background:var(--navy);color:#fff}
+  .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .pill{display:inline-block;background:var(--soft);color:var(--navy);font-weight:700;border-radius:999px;padding:2px 12px;font-size:15px}
+
+  .sl{margin-top:14px}
+  .sl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .sl .top b{font-size:18px}
+  .sl input[type=range]{width:100%;height:34px;accent-color:var(--navy)}
+  .sl .ticks{display:flex;justify-content:space-between;font-size:14px;color:var(--sub);padding:0 4px}
+
+  .result{border:3px solid var(--navy)}
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sc{border-radius:12px;padding:12px 6px;text-align:center;color:#fff}
+  .sc .t{font-size:15px;font-weight:700;opacity:.95}
+  .sc .a{font-size:15px;opacity:.9}
+  .sc .v{font-size:22px;font-weight:900;line-height:1.3}
+  .sc .r{font-size:14px;opacity:.9}
+  .sc.e{background:var(--early)} .sc.n{background:var(--normal)} .sc.l{background:var(--late)}
+
+  h3.sub{font-size:18px;color:var(--navy);margin-top:20px}
+  .be{margin-top:8px}
+  .be .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--soft);margin-top:8px;font-size:16px}
+  .be .row b{font-size:20px;color:var(--navy);white-space:nowrap}
+  .read{background:var(--warm);border:2px solid #f3d08e;border-radius:12px;padding:14px;margin-top:14px;font-size:16px}
+  .read b{color:var(--orange-d)}
+
+  .chart{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 2px 2px}
+  .chart svg{display:block;width:100%;height:auto}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;color:var(--sub);margin-top:8px}
+  .legend i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}
+
+  table.tb{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.tb th,table.tb td{border:1px solid var(--line);padding:8px 5px;text-align:right}
+  table.tb th{background:var(--soft);color:var(--navy);text-align:center}
+  table.tb td:first-child{text-align:center;font-weight:700;background:#fafbfc}
+  table.tb td.me{background:var(--warm);font-weight:900;outline:2px solid var(--orange);outline-offset:-2px}
+  .scroll{overflow-x:auto}
+
+  .warnbox{background:#fdf0ee;color:#8f2f20;border:2px solid #f1c4bb;border-radius:12px;padding:12px 14px;font-size:16px;margin-top:14px}
+  .warnbox b{color:var(--bad)}
+  .info{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:16px;margin-top:14px}
+  .info ul{padding-left:20px;margin-top:4px}
+  .info b{color:var(--navy)}
+
+  .src{font-size:14px;color:var(--sub);margin-top:24px;line-height:1.7}
+  .src b{color:var(--ink)}
+  footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
+  footer .brand{font-weight:900;color:var(--navy)}
+  .disc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+
+  @media (max-width:520px){
+    header h1{font-size:23px}
+    .sc .v{font-size:19px}
+    .be .row{flex-direction:column;align-items:flex-start;gap:2px}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="eb">서울 리[Re]테크 · 노후자금 로드맵 2주차 실습</div>
+  <h1>국민연금 수령시기 비교기</h1>
+  <p>일찍 받을까, 제때 받을까, 늦게 받을까 · 누적 수령액과 손익분기 나이</p>
+</div></header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="btnSample">예시 값 넣어보기</button>
+    <button class="btn ghost" id="btnReset">처음부터 다시</button>
+  </div>
+  <p class="note">금액 단위는 <b>만원</b>입니다. 입력한 값은 이 휴대폰에만 저장되어 4주차에 다시 불러옵니다.</p>
+
+  <section class="card">
+    <div class="step"><span class="no">1</span><h2>나의 정보</h2></div>
+    <div class="grid2">
+      <div><label class="f">태어난 해</label><div class="inp"><input type="number" inputmode="numeric" id="by" min="1950" max="2000" placeholder="예: 1972"><span class="u">년생</span></div></div>
+      <div><label class="f">성별</label><div class="seg" id="sexSeg"><button data-v="M">남성</button><button data-v="F">여성</button></div></div>
+    </div>
+    <p class="note" id="byNote"></p>
+    <div style="margin-top:14px">
+      <label class="f">예상 연금 월액 <small>(정상 수령 기준, 현재가치)</small></label>
+      <div class="inp"><input type="number" inputmode="decimal" id="p" placeholder="예: 120"><span class="u">만원</span></div>
+      <p class="note">방금 조회한 국민연금공단 ‘예상연금월액’을 그대로 적으세요.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">2</span><h2>얼마나 당기고, 얼마나 미룰까</h2></div>
+    <div class="sl">
+      <div class="top"><label class="f" for="k">일찍 받기 (조기노령연금) <small>월 0.5%씩 감액</small></label><b id="kLab" style="color:var(--early)"></b></div>
+      <input type="range" id="k" min="1" max="5" step="1" value="5">
+      <div class="ticks"><span>1년</span><span>2년</span><span>3년</span><span>4년</span><span>5년</span></div>
+      <p class="note">조기노령연금은 일부만 당겨 받을 수 없어 연금 전액 기준입니다.</p>
+    </div>
+    <div class="sl">
+      <div class="top"><label class="f" for="d">늦게 받기 (연기연금) <small>월 0.6%씩 증액</small></label><b id="dLab" style="color:var(--late)"></b></div>
+      <input type="range" id="d" min="1" max="5" step="1" value="5">
+      <div class="ticks"><span>1년</span><span>2년</span><span>3년</span><span>4년</span><span>5년</span></div>
+    </div>
+    <div style="margin-top:14px">
+      <label class="f">미루는 비중 <small>(연금의 50~100% 중 선택)</small></label>
+      <div class="seg" id="fSeg"><button data-v="50">50%</button><button data-v="60">60%</button><button data-v="70">70%</button><button data-v="80">80%</button><button data-v="90">90%</button><button data-v="100">100%</button></div>
+      <p class="note" id="fNote"></p>
+    </div>
+    <p class="note">실제로는 월 단위로 정할 수 있습니다. 여기서는 연 단위로 어림합니다 (1년 당기면 6% 감액, 1년 미루면 7.2% 증액). 한번 정해진 비율은 평생 유지됩니다.</p>
+  </section>
+
+  <section class="card result">
+    <div class="step"><span class="no">✓</span><h2>비교 결과</h2></div>
+    <div id="resBody"></div>
+  </section>
+
+  <div class="src">
+    <b>계산 방식</b><br>
+    · 조기 월액 = 정상 월액 × (1 − 6% × 당긴 햇수). 실제 감액은 월 0.5% 단위입니다.<br>
+    · 연기 월액 = 미룬 부분 × (1 + 7.2% × 미룬 햇수) + 제때 받는 부분. 실제 증액은 월 0.6% 단위이며, 미루는 비중은 50~100% 중 10% 단위로 고릅니다.<br>
+    · 누적 수령액 = 월액 × 12 × (나이 − 받기 시작한 나이). 일부만 미루면 제때 받는 부분과 미룬 부분을 따로 더합니다.<br>
+    · 국민연금은 매년 물가만큼 오르므로 세 경우 모두 <b>오늘 가치(현재가치)</b>로 비교합니다. 받은 돈을 투자해 불리는 효과, 세금, 건강보험료는 계산에 넣지 않았습니다.<br>
+    · 기대수명 = 올해 나이 + 2024년 생명표 기대여명(40~70세)<br><br>
+    <b>출처</b><br>
+    · 수급개시연령, 조기노령연금 감액률, 연기연금 가산율: 국민연금공단 노령연금 안내 (2026년 기준)<br>
+    · 기대여명: 국가데이터처 「2024년 생명표」(2025.12.)<br>
+    · 건강보험 피부양자 소득요건: 국민건강보험공단 피부양자 자격 인정기준
+  </div>
+
+  <footer>
+    <div class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</div>
+    <div class="disc">본 계산기는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. 정확한 수치는 전문가 상담을 통해 확인하시기 바랍니다.</div>
+  </footer>
+</div>
+
+<script>
+/* ── 2024년 생명표 기대여명 (Tx/lx, 40~70세) ── */
+const LIFE = {
+  M:[41.88,40.94,39.99,39.05,38.11,37.17,36.23,35.30,34.38,33.46,32.55,31.64,30.73,29.83,28.94,28.06,27.18,26.31,25.44,24.58,23.72,22.87,22.03,21.19,20.37,19.54,18.72,17.91,17.11,16.31,15.53],
+  F:[47.41,46.44,45.48,44.52,43.56,42.60,41.64,40.68,39.73,38.77,37.82,36.87,35.93,34.98,34.04,33.09,32.15,31.21,30.27,29.33,28.39,27.46,26.52,25.59,24.67,23.75,22.83,21.92,21.01,20.11,19.21]
+};
+const EARLY = 0.06, LATE = 0.072;   // 1년당 감액률·가산률
+const DEP_LIMIT = 2000;             // 건강보험 피부양자 소득요건 (연, 만원)
+const KEY = 'retech_intro_timing_v1';
+const KEY_W1 = 'retech_intro_retire_v2';
+const THIS_YEAR = new Date().getFullYear();
+const $ = id => document.getElementById(id);
+const state = { sex:'M', f:100 };
+
+function num(id){ const v = parseFloat($(id).value); return isFinite(v)?v:0; }
+function man(v){
+  v = Math.round(v);
+  const eok = Math.floor(v/10000), rest = v%10000;
+  return eok ? `${eok}억` + (rest?` ${rest.toLocaleString()}만원`:'원') : `${rest.toLocaleString()}만원`;
+}
+function manS(v){ return v>=10000 ? (v/10000).toFixed(2)+'억' : Math.round(v).toLocaleString()+'만'; }
+function ageYM(x){
+  let y = Math.floor(x), m = Math.round((x-y)*12);
+  if(m===12){ y++; m=0; }
+  return m ? `${y}세 ${m}개월` : `${y}세`;
+}
+/* 출생연도별 노령연금 수급개시연령 */
+function normalAge(by){
+  if(by<=1952) return 60;
+  if(by<=1956) return 61;
+  if(by<=1960) return 62;
+  if(by<=1964) return 63;
+  if(by<=1968) return 64;
+  return 65;
+}
+function lifeEnd(by,sex){
+  const age = THIS_YEAR - by;
+  const a = Math.min(70,Math.max(40,age));
+  return { age, end: age + LIFE[sex][a-40], approx: age<40||age>70 };
+}
+
+function paintSeg(){
+  $('sexSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.sex));
+  $('fSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.v===state.f));
+}
+$('fSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ state.f=+b.dataset.v; paintSeg(); update(); }));
+$('sexSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ state.sex=b.dataset.v; paintSeg(); update(); }));
+['by','p','k','d'].forEach(id=>$(id).addEventListener('input',update));
+
+/* ── 계산 ── */
+function calc(by,P,k,d,f){
+  const N = normalAge(by);
+  const now = P*(1-f), later = P*f*(1+LATE*d);   // 연기: 제때 받는 부분 / 미뤘다 받는 부분
+  const sc = [
+    {key:'e', name:'조기', start:N-k, amt:P*(1-EARLY*k), rate:-EARLY*k, parts:[{start:N-k, amt:P*(1-EARLY*k)}]},
+    {key:'n', name:'정상', start:N,   amt:P,             rate:0,        parts:[{start:N, amt:P}]},
+    {key:'l', name:'연기', start:N+d, amt:now+later,     rate:f*LATE*d, bridge:now, parts:[{start:N, amt:now},{start:N+d, amt:later}]}
+  ];
+  const cum = (s,age)=> s.parts.reduce((t,p)=> t + Math.max(0, age - p.start) * p.amt * 12, 0);
+  // 두 선이 만나는 나이 (모든 연금이 시작된 뒤 구간): Σ amt×(x−start) 가 같아지는 x
+  const sum = (s,fn)=> s.parts.reduce((t,p)=>t+fn(p),0);
+  const cross = (a,b)=> (sum(b,p=>p.amt*p.start) - sum(a,p=>p.amt*p.start)) / (sum(b,p=>p.amt) - sum(a,p=>p.amt));
+  return { N, sc, cum, beEN:cross(sc[0],sc[1]), beNL:cross(sc[1],sc[2]), beEL:cross(sc[0],sc[2]) };
+}
+
+/* ── 그래프 (SVG) ── */
+function chart(r, lifeAge){
+  const W=360,H=250, L=44,R=10,T=14,B=30;
+  const x0=60, x1=100;
+  const yMax = Math.max(...r.sc.map(s=>r.cum(s,x1))) || 1;
+  const X = a => L + (a-x0)/(x1-x0)*(W-L-R);
+  const Y = v => H-B - v/yMax*(H-T-B);
+  const col = {e:'var(--early)', n:'var(--normal)', l:'var(--late)'};
+  let g = '';
+  // 가로 눈금
+  for(let i=0;i<=4;i++){
+    const v = yMax*i/4, y = Y(v);
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e8ee" stroke-width="1"/>`;
+    g += `<text x="${L-5}" y="${y+4}" text-anchor="end" font-size="11" fill="#5b6573">${i? (v>=10000?(v/10000).toFixed(1)+'억':Math.round(v/100)*100+'만') : '0'}</text>`;
+  }
+  // 세로 눈금
+  for(let a=x0;a<=x1;a+=10){
+    g += `<text x="${X(a)}" y="${H-B+16}" text-anchor="${a===x1?'end':'middle'}" font-size="12" fill="#5b6573">${a}세</text>`;
+  }
+  // 기대수명
+  if(lifeAge>x0 && lifeAge<x1){
+    const x = X(lifeAge);
+    g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" stroke="#b87400" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    g += `<text x="${Math.min(x+4,W-R-52)}" y="${T+10}" font-size="11" font-weight="700" fill="#b87400">기대수명 ${Math.round(lifeAge)}세</text>`;
+  }
+  // 선
+  r.sc.forEach(s=>{
+    g += `<polyline fill="none" stroke="${col[s.key]}" stroke-width="3" stroke-linejoin="round" points="${[x0, ...s.parts.map(p=>p.start), x1].map(a=>`${X(a)},${Y(r.cum(s,a))}`).join(' ')}"/>`;
+  });
+  // 손익분기점
+  [[r.beEN,r.sc[1]],[r.beNL,r.sc[2]]].forEach(([a,s])=>{
+    if(a>x0 && a<x1){
+      g += `<circle cx="${X(a)}" cy="${Y(r.cum(s,a))}" r="5.5" fill="#fff" stroke="#1b2430" stroke-width="2"/>`;
+      g += `<text x="${X(a)-8}" y="${Y(r.cum(s,a))-9}" text-anchor="end" font-size="12" font-weight="700" fill="#1b2430">${a.toFixed(1)}세</text>`;
+    }
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="나이별 누적 수령액 그래프">${g}</svg>`;
+}
+
+/* ── 화면 갱신 ── */
+function update(){
+  const by = Math.round(num('by')), P = num('p'), k = Math.round(num('k')), d = Math.round(num('d')), f = state.f/100;
+  $('kLab').textContent = `${k}년 일찍 · ${Math.round(EARLY*k*100)}% 감액`;
+  $('dLab').textContent = `${d}년 늦게 · ${(LATE*d*100).toFixed(1)}% 증액`;
+  $('fNote').textContent = f<1 ? `연금의 ${100-state.f}%는 제때 받고, ${state.f}%만 ${d}년 미룹니다. 증액은 미룬 부분에만 붙습니다.` : '연금 전부를 미룹니다.';
+  save();
+
+  const okBy = by>=1940 && by<=2010;
+  if(okBy){
+    const N = normalAge(by);
+    $('byNote').innerHTML = `<span class="pill">${by}년생</span> 정상 수령 <b>${N}세</b> · 조기 수령은 <b>${N-5}세</b>부터 가능`;
+  } else $('byNote').textContent = '';
+
+  const res = $('resBody');
+  if(!okBy || P<=0){
+    res.innerHTML = '<p class="desc">태어난 해와 예상 연금 월액을 입력하면 결과가 나타납니다.</p>';
+    return;
+  }
+  const r = calc(by,P,k,d,f);
+  const lf = lifeEnd(by,state.sex);
+  const ages = [75,80,85,90,95];
+  const top = a => { const v = r.sc.map(s=>r.cum(s,a)); return v.indexOf(Math.max(...v)); };
+  const lifeTop = r.sc[top(lf.end)];
+  const over = r.sc.filter(s=>s.amt*12>DEP_LIMIT);
+
+  res.innerHTML = `
+    <div class="cards3">
+      ${r.sc.map(s=>`<div class="sc ${s.key}">
+        <div class="t">${s.name}</div>
+        <div class="a">${s.start}세부터</div>
+        <div class="v">월 ${Math.round(s.amt).toLocaleString()}만</div>
+        <div class="r">${s.rate===0?'기준':(s.rate>0?'+':'−')+(Math.abs(s.rate)*100).toFixed(1).replace('.0','')+'%'}${s.bridge>0?`<br>그 전 ${d}년은 월 ${Math.round(s.bridge).toLocaleString()}만`:''}</div>
+      </div>`).join('')}
+    </div>
+
+    <h3 class="sub">몇 살까지 살아야 본전일까 (손익분기 나이)</h3>
+    <div class="be">
+      <div class="row"><span><b style="color:var(--early);font-size:16px">조기</b> vs <b style="font-size:16px">정상</b> — 이 나이부터 정상이 앞섭니다</span><b>${ageYM(r.beEN)}</b></div>
+      <div class="row"><span><b style="font-size:16px">정상</b> vs <b style="color:var(--late);font-size:16px">연기</b> — 이 나이부터 연기가 앞섭니다</span><b>${ageYM(r.beNL)}</b></div>
+      <div class="row"><span><b style="color:var(--early);font-size:16px">조기</b> vs <b style="color:var(--late);font-size:16px">연기</b> — 이 나이부터 연기가 앞섭니다</span><b>${ageYM(r.beEL)}</b></div>
+    </div>
+
+    <div class="read">
+      ${by}년생 ${state.sex==='M'?'남성':'여성'}의 기대수명은 약 <b>${lf.end.toFixed(1)}세</b>입니다${lf.approx?' (생명표 범위 밖이라 가장 가까운 나이로 근사)':''}.
+      그 나이까지 받는다면 누적 수령액은 <b>${lifeTop.name}</b> 수령이 가장 많습니다.<br>
+      기대수명은 평균입니다. 절반은 그보다 더 오래 삽니다.
+    </div>
+
+    <h3 class="sub">나이별 누적 수령액</h3>
+    <div class="chart">${chart(r, lf.end)}</div>
+    <div class="legend">
+      <span><i style="background:var(--early)"></i>조기 (${r.sc[0].start}세~)</span>
+      <span><i style="background:var(--normal)"></i>정상 (${r.sc[1].start}세~)</span>
+      <span><i style="background:var(--late)"></i>연기 ${state.f}% (${r.sc[2].start}세~)</span>
+      <span>○ 손익분기</span>
+    </div>
+
+    <div class="scroll"><table class="tb">
+      <tr><th>이 나이까지</th><th>조기</th><th>정상</th><th>연기</th></tr>
+      ${ages.map(a=>{const t=top(a);return `<tr><td>${a}세</td>${r.sc.map((s,i)=>`<td class="${i===t?'me':''}">${manS(r.cum(s,a))}</td>`).join('')}</tr>`}).join('')}
+    </table></div>
+    <p class="note">노란 칸이 그 나이까지 가장 많이 받는 경우입니다. 금액은 모두 오늘 가치 기준입니다.</p>
+
+    ${over.length?`<div class="warnbox">
+      <b>건강보험 피부양자 확인</b><br>
+      ${over.map(s=>`${s.name} 수령 시 연 ${Math.round(s.amt*12).toLocaleString()}만원`).join(', ')}으로 <b>연 2,000만원</b>을 넘습니다.
+      공적연금을 포함한 소득이 연 2,000만원을 넘으면 자녀·배우자의 피부양자가 될 수 없어 지역가입자로 건강보험료를 내게 됩니다.
+    </div>`:`<div class="info"><b>건강보험 피부양자</b> — 세 경우 모두 연금만으로는 연 2,000만원 이하입니다. 다른 소득(이자·배당·사업·근로)과 합산해 판단하니 함께 확인하세요.</div>`}
+
+    <div class="info">
+      <b>숫자만으로 정할 수 없는 것들</b>
+      <ul>
+        <li>조기 수령 조건: 가입 10년 이상 + 소득이 A값(2026년 월 319만원) 이하</li>
+        <li>연금 받기 전 공백기의 생활비를 무엇으로 메울지</li>
+        <li>내 건강, 가족력, 일을 계속할지 여부</li>
+      </ul>
+    </div>`;
+}
+
+/* ── 저장/불러오기 ── */
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({sex:state.sex, f:state.f, by:$('by').value, p:$('p').value, k:$('k').value, d:$('d').value})); }catch(e){}
+}
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s){ state.sex=s.sex||'M'; state.f=s.f||100; $('by').value=s.by||''; $('p').value=s.p||''; $('k').value=s.k||5; $('d').value=s.d||5; return; }
+    // 1주차 계산기에 입력한 값이 있으면 이어받기
+    const w = JSON.parse(localStorage.getItem(KEY_W1)||'null');
+    if(w && w.v){
+      state.sex = w.sex||'M';
+      const cur = parseFloat(w.v.cur); if(isFinite(cur) && cur>0) $('by').value = THIS_YEAR - cur;
+      if(w.v.p1) $('p').value = w.v.p1;
+    }
+  }catch(e){}
+}
+$('btnSample').addEventListener('click',()=>{
+  state.sex='M'; state.f=100; $('by').value=1972; $('p').value=120; $('k').value=5; $('d').value=5; paintSeg(); update();
+});
+$('btnReset').addEventListener('click',()=>{
+  if(!confirm('입력한 내용을 모두 지울까요?')) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  state.sex='M'; state.f=100; $('by').value=''; $('p').value=''; $('k').value=5; $('d').value=5; paintSeg(); update();
+});
+
+load(); paintSeg(); update();
+</script>
+</body>
+</html>

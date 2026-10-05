@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>배우자 사망 시 연금 비교기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --navy2:#2d5282; --orange:#F5A623; --orange-d:#b87400;
+    --ink:#1b2430; --sub:#5b6573; --line:#d5dce5; --bg:#f3f5f8; --card:#fff;
+    --soft:#eef3f9; --warm:#fff6e6; --good:#1f8a5b; --warn:#d98a00; --bad:#c2412d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',sans-serif;font-size:17px;line-height:1.6;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+  header{background:var(--navy);color:#fff;padding:22px 16px 20px}
+  header .in{max-width:720px;margin:0 auto}
+  header .eb{color:var(--orange);font-size:14px;font-weight:700}
+  header h1{font-size:26px;font-weight:900;line-height:1.3;margin:2px 0 6px}
+  header p{font-size:16px;opacity:.9}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+  .btn{font:700 16px 'Noto Sans KR',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .btn.ghost{border-color:var(--line);color:var(--sub)}
+
+  .card{background:var(--card);border-radius:14px;padding:20px 16px;margin-top:16px;box-shadow:0 1px 4px rgba(20,40,70,.08)}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .step .no{background:var(--navy);color:#fff;font-weight:900;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step h2{font-size:20px;font-weight:900;color:var(--navy)}
+  .desc{font-size:16px;color:var(--sub);margin-bottom:12px}
+
+  label.f{display:block;font-size:16px;font-weight:700;margin:12px 0 4px}
+  label.f small{font-weight:400;color:var(--sub)}
+  .inp{position:relative}
+  .inp input{width:100%;font:500 18px 'Noto Sans KR',sans-serif;padding:10px 52px 10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .inp input:focus{outline:none;border-color:var(--navy2)}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;pointer-events:none}
+  .seg{display:flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;font:700 16px 'Noto Sans KR',sans-serif;padding:10px 4px;border:0;background:#fff;color:var(--sub);cursor:pointer;line-height:1.35}
+  .seg button.on{background:var(--navy);color:#fff}
+  .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .surv{background:var(--soft);border-radius:12px;padding:4px 12px 12px;margin-top:12px}
+  .surv .auto{font-size:16px;margin-top:8px}
+  .surv .auto b{color:var(--navy);font-size:18px}
+
+  .result{border:3px solid var(--navy)}
+  .case{border:2px solid var(--line);border-radius:12px;padding:16px 14px;margin-top:14px}
+  .case h3{font-size:18px;font-weight:900;color:var(--navy)}
+  .case .who{font-size:16px;color:var(--sub)}
+  .hero{background:var(--navy);color:#fff;border-radius:12px;padding:14px;text-align:center;margin-top:10px}
+  .hero .t{font-size:16px;opacity:.9}
+  .hero .v{font-size:30px;font-weight:900;color:var(--orange);line-height:1.3}
+  .hero .s{font-size:16px;opacity:.95}
+  .bars .lab{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-top:12px}
+  .bar{height:30px;display:flex;border-radius:8px;overflow:hidden;background:#e7ebf0;margin-top:4px}
+  .bar div{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;color:var(--sub);margin-top:8px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+  .rule{background:var(--warm);border:2px solid #f3d08e;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:16px}
+  .rule b{color:var(--orange-d)}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opt{border:2px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:#fff}
+  .opt.best{border-color:var(--orange);background:var(--warm)}
+  .opt .t{font-size:15px;font-weight:700;color:var(--sub)}
+  .opt .v{font-size:22px;font-weight:900;color:var(--navy);line-height:1.35}
+  .opt .s{font-size:15px;color:var(--sub)}
+  .opt .tag{display:inline-block;background:var(--orange);color:#fff;border-radius:999px;font-size:14px;font-weight:700;padding:1px 10px;margin-top:4px}
+
+  table.tb{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.tb th,table.tb td{border:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+  table.tb th{background:var(--soft);color:var(--navy);text-align:center}
+  table.tb tr.me td{background:var(--warm);font-weight:700}
+  h3.sub{font-size:18px;color:var(--navy);margin-top:22px}
+  .info{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:16px;margin-top:14px}
+  .info ul{padding-left:20px;margin-top:4px}
+  .info b{color:var(--navy)}
+
+  .src{font-size:14px;color:var(--sub);margin-top:24px;line-height:1.7}
+  .src b{color:var(--ink)}
+  footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
+  footer .brand{font-weight:900;color:var(--navy)}
+  .disc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+
+  @media (max-width:520px){
+    header h1{font-size:23px}
+    .hero .v{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="eb">서울 리[Re]테크 · 노후자금 로드맵 2주차 실습</div>
+  <h1>배우자 사망 시 연금 비교기</h1>
+  <p>부부 중 한 사람이 먼저 떠나면, 남은 사람의 연금은 얼마가 될까</p>
+</div></header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="btnSample">예시 값 넣어보기</button>
+    <button class="btn ghost" id="btnReset">처음부터 다시</button>
+  </div>
+  <p class="note">금액 단위는 <b>만원</b>입니다. 입력한 값은 이 휴대폰에만 저장되어 4주차에 다시 불러옵니다.</p>
+
+  <section class="card">
+    <div class="step"><span class="no">1</span><h2>나의 연금</h2></div>
+    <label class="f" style="margin-top:0">연금 종류</label>
+    <div class="seg" id="t1Seg"><button data-v="N">국민연금</button><button data-v="J">직역연금<br><small>공무원·사학·군인</small></button></div>
+    <label class="f">내 연금 월액 <small>(없으면 0)</small></label>
+    <div class="inp"><input type="number" inputmode="decimal" id="a1" placeholder="예: 60"><span class="u">만원</span></div>
+    <div class="surv" id="sv1"></div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">2</span><h2>배우자의 연금</h2></div>
+    <label class="f" style="margin-top:0">연금 종류</label>
+    <div class="seg" id="t2Seg"><button data-v="N">국민연금</button><button data-v="J">직역연금<br><small>공무원·사학·군인</small></button></div>
+    <label class="f">배우자 연금 월액 <small>(없으면 0)</small></label>
+    <div class="inp"><input type="number" inputmode="decimal" id="a2" placeholder="예: 150"><span class="u">만원</span></div>
+    <div class="surv" id="sv2"></div>
+  </section>
+
+  <section class="card result">
+    <div class="step"><span class="no">✓</span><h2>남은 사람이 받는 연금</h2></div>
+    <div id="resBody"></div>
+  </section>
+
+  <div class="src">
+    <b>계산 방식</b><br>
+    · 국민연금 유족연금: 사망자 가입기간 20년 이상이면 기본연금액의 60%. 이 도구는 20년 이상 가입자의 정상 수령 노령연금을 기본연금액으로 보고 계산합니다. 20년 미만(10~20년 50%, 10년 미만 40%)은 기준이 되는 기본연금액이 노령연금과 달라 공단 조회값을 직접 입력합니다.<br>
+    · 직역연금 유족연금: 퇴직연금(퇴역연금)의 60%<br>
+    · 둘 다 국민연금: 본인 노령연금 + 유족연금의 30%, 또는 유족연금 전액 중 선택<br>
+    · 국민연금과 직역연금 사이: 중복급여 조정 없음<br>
+    · 둘 다 직역연금: 유족연금의 1/2만 지급, 본인 연금은 전액<br><br>
+    <b>출처</b><br>
+    · 국민연금공단 유족연금·중복급여 조정 안내 (국민연금법 제56조, 제74조)<br>
+    · 공무원연금공단 연금승계(퇴직유족연금) 안내<br>
+    · 찾기 쉬운 생활법령정보 「노후준비와 연금제도」 직역연금
+  </div>
+
+  <footer>
+    <div class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</div>
+    <div class="disc">본 계산기는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. 정확한 수치는 전문가 상담을 통해 확인하시기 바랍니다.</div>
+  </footer>
+</div>
+
+<script>
+const NPS_SURV = 0.6;     // 국민연금 유족연금: 가입 20년 이상 기본연금액의 60%
+const NPS_ADD = 0.3;      // 노령연금 선택 시 유족연금의 30% 추가
+const JOB_SURV = 0.6;     // 직역연금 유족연금 60%
+const JOB_HALF = 0.5;     // 유족이 직역연금 수급자면 유족연금 1/2
+const KEY = 'retech_intro_survivor_v1';
+const KEY_W1 = 'retech_intro_retire_v2';
+const $ = id => document.getElementById(id);
+const state = { t1:'N', t2:'N', m1:'auto', m2:'auto', s1:'', s2:'' };
+const NAME = {N:'국민연금', J:'직역연금'};
+
+function numv(v){ v = parseFloat(v); return isFinite(v)&&v>0?v:0; }
+function won(v){ return Math.round(v).toLocaleString()+'만원'; }
+
+/* ── 유족연금 입력 영역 (종류에 따라 다시 그림) ── */
+function drawSurv(i){
+  const t = state['t'+i], m = state['m'+i], a = numv($('a'+i).value);
+  const whoDie = i===1 ? '내가 먼저 사망하면 배우자가 받을 유족연금' : '배우자가 먼저 사망하면 내가 받을 유족연금';
+  const box = $('sv'+i);
+  if(t==='J'){
+    box.innerHTML = `<label class="f">${whoDie}</label>
+      <div class="auto">직역연금의 60% → <b>${won(a*JOB_SURV)}</b></div>
+      <p class="note">남은 사람도 직역연금을 받고 있으면 이 금액의 절반만 지급됩니다.</p>`;
+    return;
+  }
+  box.innerHTML = `<label class="f">${whoDie}</label>
+    <div class="seg" id="m${i}Seg">
+      <button data-v="auto" class="${m==='auto'?'on':''}">가입 20년 이상<br><small>자동 계산 (60%)</small></button>
+      <button data-v="in" class="${m==='in'?'on':''}">20년 미만 또는<br><small>조회값 직접 입력</small></button>
+    </div>
+    ${m==='auto'
+      ? `<div class="auto">노령연금의 60% → <b>${won(a*NPS_SURV)}</b></div>
+         <p class="note">조기·연기 수령으로 금액이 달라졌다면 정상 수령 기준 금액으로 적는 것이 정확합니다.</p>`
+      : `<div class="inp" style="margin-top:8px"><input type="number" inputmode="decimal" id="s${i}" value="${state['s'+i]}" placeholder="유족연금 예상 월액"><span class="u">만원</span></div>
+         <p class="note">국민연금공단 누리집·앱의 ‘유족연금 예상액’ 조회값을 적으세요.</p>`}`;
+  box.querySelectorAll('#m'+i+'Seg button').forEach(b=>b.addEventListener('click',()=>{ state['m'+i]=b.dataset.v; drawSurv(i); update(); }));
+  const s = $('s'+i);
+  if(s) s.addEventListener('input',()=>{ state['s'+i]=s.value; update(); });
+}
+function paintSeg(){
+  [1,2].forEach(i=>$('t'+i+'Seg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===state['t'+i])));
+}
+[1,2].forEach(i=>{
+  $('t'+i+'Seg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ state['t'+i]=b.dataset.v; paintSeg(); drawSurv(i); update(); }));
+  $('a'+i).addEventListener('input',()=>{ drawSurv(i); update(); });
+});
+
+/* 사망자 i 의 유족연금 (조정 전 전액) */
+function survOf(i){
+  const a = numv($('a'+i).value);
+  if(state['t'+i]==='J') return a*JOB_SURV;
+  return state['m'+i]==='auto' ? a*NPS_SURV : numv(state['s'+i]);
+}
+
+/* ── 핵심 계산: 생존자(tx, ax) / 사망자(ty, S=유족연금 전액) ── */
+function settle(tx, ax, ty, S){
+  if(tx==='N' && ty==='N'){
+    const A = ax + S*NPS_ADD, B = S;
+    return { kind:'NN', own:A>=B?ax:0, add:A>=B?S*NPS_ADD:S, total:Math.max(A,B), A, B, pick:A>=B?'A':'B',
+      rule:`둘 다 국민연금 → <b>둘 중 하나를 선택</b>해야 합니다. 본인 노령연금을 고르면 유족연금은 30%만, 유족연금을 고르면 본인 노령연금은 받지 못합니다.` };
+  }
+  if(tx==='J' && ty==='J'){
+    return { kind:'JJ', own:ax, add:S*JOB_HALF, total:ax+S*JOB_HALF,
+      rule:`둘 다 직역연금 → 본인 연금은 전액, 유족연금은 <b>절반</b>(${won(S)} × 1/2)만 받습니다.` };
+  }
+  return { kind:'MIX', own:ax, add:S, total:ax+S,
+    rule:`국민연금과 직역연금 사이에는 중복급여 조정이 없습니다 → 본인 연금 <b>전액</b> + 유족연금 <b>전액</b>.` };
+}
+
+function caseHtml(title, who, tx, ax, ty, ay, S){
+  const r = settle(tx, ax, ty, S);
+  const before = ax+ay;
+  const drop = before>0 ? (1 - r.total/before)*100 : 0;
+  const mx = Math.max(before, r.total) || 1;
+  return `<div class="case">
+    <h3>${title}</h3>
+    <div class="who">${who}</div>
+    <div class="hero">
+      <div class="t">남은 사람이 받는 연금</div>
+      <div class="v">월 ${won(r.total)}</div>
+      <div class="s">부부 합산 ${won(before)} → ${drop>=0?`<b>${drop.toFixed(0)}% 감소</b>`:`${Math.abs(drop).toFixed(0)}% 증가`}</div>
+    </div>
+    ${r.kind==='NN'?`<div class="opts">
+      <div class="opt ${r.pick==='A'?'best':''}"><div class="t">① 본인 노령연금 선택</div><div class="v">${won(r.A)}</div><div class="s">${won(ax)} + 유족 ${won(S)}×30%</div>${r.pick==='A'?'<span class="tag">더 많음</span>':''}</div>
+      <div class="opt ${r.pick==='B'?'best':''}"><div class="t">② 유족연금 선택</div><div class="v">${won(r.B)}</div><div class="s">유족연금 전액, 본인 연금 0</div>${r.pick==='B'?'<span class="tag">더 많음</span>':''}</div>
+    </div>`:''}
+    <div class="bars">
+      <div class="lab"><span>사망 전 (부부 합산)</span><span>${won(before)}</span></div>
+      <div class="bar" style="width:${before/mx*100}%">
+        <div style="width:${before?ax/before*100:0}%;background:var(--navy)">${ax/mx>.18?'남은 사람':''}</div>
+        <div style="width:${before?ay/before*100:0}%;background:#8fa3ba">${ay/mx>.18?'먼저 떠난 사람':''}</div>
+      </div>
+      <div class="lab"><span>사망 후</span><span>${won(r.total)}</span></div>
+      <div class="bar" style="width:${r.total/mx*100}%">
+        <div style="width:${r.total?r.own/r.total*100:0}%;background:var(--navy)">${r.own/mx>.18?'본인 연금':''}</div>
+        <div style="width:${r.total?r.add/r.total*100:0}%;background:var(--orange-d)">${r.add/mx>.18?'유족연금':''}</div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--navy)"></i>남은 사람 본인 연금 ${won(r.own)}</span>
+        <span><i style="background:var(--orange-d)"></i>유족연금 ${won(r.add)}</span>
+      </div>
+    </div>
+    <div class="rule">${r.rule}</div>
+  </div>`;
+}
+
+function update(){
+  save();
+  const a1 = numv($('a1').value), a2 = numv($('a2').value);
+  const res = $('resBody');
+  if(a1<=0 && a2<=0){
+    res.innerHTML = '<p class="desc">나와 배우자의 연금 월액을 입력하면 결과가 나타납니다.</p>';
+    return;
+  }
+  const S1 = survOf(1), S2 = survOf(2);
+  const combo = state.t1===state.t2 ? (state.t1==='N'?'NN':'JJ') : 'MIX';
+  res.innerHTML =
+    caseHtml('배우자가 먼저 떠나면', `내가 받는 연금 · 나 ${NAME[state.t1]} / 배우자 ${NAME[state.t2]}`, state.t1, a1, state.t2, a2, S2) +
+    caseHtml('내가 먼저 떠나면', `배우자가 받는 연금 · 배우자 ${NAME[state.t2]} / 나 ${NAME[state.t1]}`, state.t2, a2, state.t1, a1, S1) +
+    `<h3 class="sub">부부 연금 조합별 규칙</h3>
+    <table class="tb">
+      <tr><th>부부 조합</th><th>남은 사람이 받는 것</th></tr>
+      <tr class="${combo==='NN'?'me':''}"><td>둘 다 국민연금</td><td>본인 노령연금 + 유족연금 30%<br>또는 유족연금 전액 (선택)</td></tr>
+      <tr class="${combo==='MIX'?'me':''}"><td>국민연금 + 직역연금</td><td>본인 연금 전액 + 유족연금 전액</td></tr>
+      <tr class="${combo==='JJ'?'me':''}"><td>둘 다 직역연금</td><td>본인 연금 전액 + 유족연금의 1/2</td></tr>
+    </table>
+    <div class="info">
+      <b>이 계산에 넣지 않은 것</b>
+      <ul>
+        <li>유족연금은 <b>재혼하면 사라집니다</b></li>
+        <li>국민연금 유족연금은 3년 지급 후, 일정 나이 전까지 소득이 있으면 지급이 멈출 수 있습니다</li>
+        <li>부양가족연금액, 조기·연기 수령에 따른 차이</li>
+        <li>연계연금, 퇴직연금·개인연금 (이들은 상속·승계 규칙이 따로 있습니다)</li>
+      </ul>
+    </div>`;
+}
+
+/* ── 저장/불러오기 ── */
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({...state, a1:$('a1').value, a2:$('a2').value})); }catch(e){}
+}
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s){
+      ['t1','t2','m1','m2','s1','s2'].forEach(k=>{ if(s[k]!==undefined) state[k]=s[k]; });
+      $('a1').value = s.a1||''; $('a2').value = s.a2||'';
+      return;
+    }
+    // 1주차 계산기에 입력한 연금액이 있으면 이어받기
+    const w = JSON.parse(localStorage.getItem(KEY_W1)||'null');
+    if(w && w.v){
+      if(w.v.p1) $('a1').value = w.v.p1;
+      if(!w.noSp && w.v.p2) $('a2').value = w.v.p2;
+    }
+  }catch(e){}
+}
+function redraw(){ paintSeg(); drawSurv(1); drawSurv(2); update(); }
+$('btnSample').addEventListener('click',()=>{
+  Object.assign(state,{t1:'N',t2:'N',m1:'auto',m2:'auto',s1:'',s2:''});
+  $('a1').value=60; $('a2').value=150; redraw();
+});
+$('btnReset').addEventListener('click',()=>{
+  if(!confirm('입력한 내용을 모두 지울까요?')) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  Object.assign(state,{t1:'N',t2:'N',m1:'auto',m2:'auto',s1:'',s2:''});
+  $('a1').value=''; $('a2').value=''; redraw();
+});
+
+load(); redraw();
+</script>
+</body>
+</html>
