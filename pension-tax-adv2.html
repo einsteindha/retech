@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연금계좌 인출 세금 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --navy2:#2d5282; --orange:#F5A623; --orange-d:#b87400;
+    --ink:#1b2430; --sub:#5b6573; --line:#d5dce5; --bg:#f3f5f8; --card:#fff;
+    --soft:#eef3f9; --warm:#fff6e6; --good:#1f8a5b; --bad:#c2412d;
+    --sa:#9aa5b1; --sb:#3b82c4; --sc:#1E3A5F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',sans-serif;font-size:17px;line-height:1.6;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+  header{background:var(--navy);color:#fff;padding:22px 16px 20px}
+  header .in{max-width:720px;margin:0 auto}
+  header .eb{color:var(--orange);font-size:14px;font-weight:700}
+  header h1{font-size:26px;font-weight:900;line-height:1.3;margin:2px 0 6px}
+  header p{font-size:16px;opacity:.9}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+  .btn{font:700 16px 'Noto Sans KR',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .btn.ghost{border-color:var(--line);color:var(--sub)}
+
+  .card{background:var(--card);border-radius:14px;padding:20px 16px;margin-top:16px;box-shadow:0 1px 4px rgba(20,40,70,.08)}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .step .no{background:var(--navy);color:#fff;font-weight:900;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step h2{font-size:20px;font-weight:900;color:var(--navy)}
+  .desc{font-size:16px;color:var(--sub);margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label.f{display:block;font-size:16px;font-weight:700;margin-bottom:4px}
+  label.f small{font-weight:400;color:var(--sub)}
+  .inp{position:relative}
+  .inp input{width:100%;font:500 18px 'Noto Sans KR',sans-serif;padding:10px 52px 10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .inp input:focus{outline:none;border-color:var(--navy2)}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;pointer-events:none}
+  .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .gap{margin-top:14px}
+
+  .src3{display:grid;grid-template-columns:1fr 172px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+  .src3:first-of-type{border-top:0}
+  .src3 .nm{font-weight:700;font-size:17px}
+  .src3 .nm i{display:inline-flex;width:24px;height:24px;border-radius:50%;margin-right:7px;color:#fff;font-style:normal;font-size:14px;align-items:center;justify-content:center;vertical-align:2px}
+  .src3 .ex{font-size:15px;color:var(--sub);font-weight:400;display:block;padding-left:31px}
+  .sum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:16px}
+  .sum b{font-size:20px;color:var(--navy)}
+
+  .result{border:3px solid var(--navy)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpi{background:var(--soft);border-radius:12px;padding:12px 8px;text-align:center}
+  .kpi .k{font-size:15px;color:var(--sub)}
+  .kpi .v{font-size:21px;font-weight:900;color:var(--navy);line-height:1.3}
+  .kpi.hot{background:var(--warm)} .kpi.hot .v{color:var(--orange-d)}
+  h3.sub{font-size:18px;color:var(--navy);margin-top:22px}
+  .bar{display:flex;height:40px;border-radius:8px;overflow:hidden;margin-top:8px;background:#e6ebf1}
+  .bar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;min-width:0;overflow:hidden;white-space:nowrap}
+  .lgd{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;margin-top:6px}
+  .lgd i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px}
+  table.tb{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.tb th,table.tb td{border:1px solid var(--line);padding:8px 6px;text-align:right}
+  table.tb th{background:var(--soft);color:var(--navy);text-align:center}
+  table.tb td:first-child{text-align:left;font-weight:700;background:#fafbfc}
+  table.tb td small{display:block;font-weight:400;color:var(--sub);font-size:14px}
+  table.tb tr.tot td{background:var(--soft);font-weight:900}
+  .scroll{overflow-x:auto}
+  .alert{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:16px;border:2px solid}
+  .alert b.h{display:block;font-size:18px}
+  .alert.bad{background:#fdf0ee;border-color:#f1c4bb} .alert.bad b.h{color:var(--bad)}
+  .alert.ok{background:#edf7f2;border-color:#bfe3d1} .alert.ok b.h{color:var(--good)}
+  .alert.mid{background:var(--warm);border-color:#f3d08e} .alert.mid b.h{color:var(--orange-d)}
+  .info{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:16px;margin-top:14px}
+  .info ul{padding-left:20px;margin-top:4px}
+  .info b{color:var(--navy)}
+  .src{font-size:14px;color:var(--sub);margin-top:24px;line-height:1.7}
+  .src b{color:var(--ink)}
+  footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
+  footer .brand{font-weight:900;color:var(--navy)}
+  .disc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+  @media (max-width:520px){
+    header h1{font-size:23px}
+    .src3{grid-template-columns:1fr 150px}
+    .kpis{grid-template-columns:1fr}
+    .kpi{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:10px 14px}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="eb">서울 리[Re]테크 · 은퇴 포트폴리오 심화 2주차 실습 ②</div>
+  <h1>연금계좌 인출 세금 계산기</h1>
+  <p>연금저축·IRP에서 올해 얼마를 꺼내면, 세금은 얼마이고 손에는 얼마가 남을까</p>
+</div></header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="btnSample">예시 값 넣어보기</button>
+    <button class="btn ghost" id="btnReset">처음부터 다시</button>
+  </div>
+  <p class="note">입력한 값은 이 기기에만 저장됩니다. 어디로도 전송되지 않습니다.</p>
+
+  <section class="card">
+    <div class="step"><span class="no">1</span><h2>나의 정보</h2></div>
+    <div class="grid2">
+      <div><label class="f">올해 나이 <small>(만 나이)</small></label><div class="inp"><input type="number" inputmode="numeric" id="age" placeholder="예: 60"><span class="u">세</span></div></div>
+      <div><label class="f">연금 받는 햇수</label><div class="inp"><input type="number" inputmode="numeric" id="yr" placeholder="예: 1"><span class="u">년째</span></div></div>
+    </div>
+    <p class="note">올해 처음 받기 시작하면 1을 적습니다. 연금은 만 55세 이후, 가입 5년이 지나야 받을 수 있습니다. 2013년 3월 이전에 가입한 계좌는 연차를 6부터 세는 등 예외가 있으니 금융회사 화면의 "연금수령연차"를 확인하세요.</p>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">2</span><h2>연금계좌에 든 돈</h2></div>
+    <p class="desc">연금저축과 IRP를 합쳐, 돈의 출처별로 나눠 적습니다. 금융회사 앱의 "연금계좌 납입·과세 내역"이나 "소득원천별 잔액"에서 볼 수 있습니다.</p>
+    <div class="src3">
+      <label class="nm" for="a"><i style="background:var(--sa)">1</i>세액공제 안 받은 원금<span class="ex">공제 한도를 넘겨 넣은 돈, ISA 만기 이전분 등</span></label>
+      <div class="inp"><input type="number" inputmode="numeric" id="a" min="0" placeholder="0"><span class="u">만원</span></div>
+    </div>
+    <div class="src3">
+      <label class="nm" for="b"><i style="background:var(--sb)">2</i>퇴직금<span class="ex">IRP로 받은 퇴직급여 원금 (이연퇴직소득)</span></label>
+      <div class="inp"><input type="number" inputmode="numeric" id="b" min="0" placeholder="0"><span class="u">만원</span></div>
+    </div>
+    <div class="src3">
+      <label class="nm" for="c"><i style="background:var(--sc)">3</i>세액공제 받은 원금 + 수익<span class="ex">공제받은 납입금과 계좌 안에서 불어난 돈 전부</span></label>
+      <div class="inp"><input type="number" inputmode="numeric" id="c" min="0" placeholder="0"><span class="u">만원</span></div>
+    </div>
+    <div class="sum"><span>연금계좌 합계</span><b id="sumVal">0만원</b></div>
+    <div class="gap">
+      <label class="f">퇴직소득세율 <small>(퇴직금이 있을 때만)</small></label>
+      <div class="inp"><input type="number" inputmode="decimal" id="tr" step="0.1" placeholder="예: 4"><span class="u">%</span></div>
+      <p class="note">퇴직할 때 받은 "퇴직소득 원천징수영수증"의 이연퇴직소득세 ÷ 퇴직급여입니다. 근속이 길수록 낮고, 모르면 금융회사에 물어볼 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">3</span><h2>올해 꺼낼 돈</h2></div>
+    <label class="f">올해 인출액 <small>(세금 떼기 전)</small></label>
+    <div class="inp"><input type="number" inputmode="numeric" id="w" min="0" placeholder="예: 2400"><span class="u">만원</span></div>
+    <p class="note" id="wNote">한 달 200만원씩이면 2,400만원입니다.</p>
+  </section>
+
+  <section class="card result">
+    <div class="step"><span class="no">✓</span><h2>올해 세금과 실수령액</h2></div>
+    <div id="resBody"></div>
+  </section>
+
+  <div class="src">
+    <b>계산 방식</b><br>
+    · 인출 순서: 연금계좌에서 돈을 꺼내면 ① 세액공제 안 받은 원금 → ② 퇴직금 → ③ 세액공제 받은 원금과 수익 순서로 나간 것으로 봅니다. 가입자가 순서를 고를 수 없습니다.<br>
+    · 연금수령한도 = 연금계좌 평가액 ÷ (11 − 연금수령연차) × 120%. 11년차부터는 한도가 없습니다. 올해 처음 받으면 신청일 잔액, 이듬해부터는 1월 1일 잔액이 기준입니다. 이 계산기는 위에 적은 합계를 평가액으로 씁니다.<br>
+    · ② 퇴직금: 한도 안에서 받으면 퇴직소득세의 70%(연금 받는 햇수 10년 이하), 60%(11~20년), 50%(21년 이상)만 냅니다. 한도를 넘긴 부분은 100%를 냅니다. 법에서는 "실제로 연금을 받은 해"만 세지만 이 계산기는 입력한 햇수를 그대로 씁니다.<br>
+    · ③ 세액공제 받은 원금과 수익: 한도 안에서는 연금소득세 5.5%(70세 미만), 4.4%(70대), 3.3%(80세 이상). 한 해 합계가 1,500만원을 넘으면 전액을 종합과세로 신고하거나 16.5% 분리과세를 고릅니다. 이 계산기는 16.5%로 계산합니다. 한도를 넘긴 부분은 기타소득세 16.5%입니다.<br>
+    · 세율은 지방소득세를 더한 값입니다. 종신형 연금보험의 세율, 의료비 등 부득이한 사유의 인출, 다른 금융회사의 연금계좌는 반영하지 않았습니다.<br><br>
+    <b>출처</b><br>
+    · 국세청 「연금소득 원천징수 방법」 (2026년 수령분 기준 세율·감면율)<br>
+    · 소득세법 제14조·제129조, 같은 법 시행령 제40조의2(연금수령한도)·제40조의3(인출순서)
+  </div>
+
+  <footer>
+    <div class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</div>
+    <div class="disc">본 계산기는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. 실제 세금은 계좌별 내역과 다른 소득에 따라 달라집니다. 정확한 수치는 금융회사와 세무 전문가 상담을 통해 확인하시기 바랍니다.</div>
+  </footer>
+</div>
+
+<script>
+const KEY = 'retech_adv_pensiontax_v1';
+const IDS = ['age','yr','a','b','c','tr','w'];
+const $ = id => document.getElementById(id);
+function num(id){ const v = parseFloat($(id).value); return isFinite(v)&&v>0?v:0; }
+function man(v){
+  v = Math.round(v); if(v<0) v=0;
+  const eok = Math.floor(v/10000), rest = v%10000;
+  return eok ? `${eok}억` + (rest?` ${rest.toLocaleString()}만원`:'원') : `${rest.toLocaleString()}만원`;
+}
+function won(v){ return v<100 ? `${(Math.round(v*10)/10).toLocaleString()}만원` : man(v); }
+IDS.forEach(id=>$(id).addEventListener('input',update));
+
+/* ── 세금 계산 (단위: 만원) ── */
+function calc(d){
+  const total = d.a+d.b+d.c, W = Math.min(d.w,total);
+  const limit = d.yr>=11 ? Infinity : total/(11-d.yr)*1.2;
+  const inLim = Math.min(W,limit);                       // 한도 안에서 꺼낸 돈 (먼저 나간 것으로 본다)
+  const seg = (start,size)=>{                            // 인출 순서상 [start, start+size) 구간
+    const take = Math.max(0, Math.min(W,start+size)-start);
+    const inn  = Math.max(0, Math.min(inLim,start+size)-start);
+    return { take, inn:Math.min(inn,take), over:take-Math.min(inn,take) };
+  };
+  const A = seg(0,d.a), B = seg(d.a,d.b), C = seg(d.a+d.b,d.c);
+  const keep = d.yr>20 ? 0.5 : d.yr>10 ? 0.6 : 0.7;      // 퇴직소득세 중 내는 비율
+  const cRate = d.age>=80 ? 0.033 : d.age>=70 ? 0.044 : 0.055;
+  const cOver1500 = C.inn>1500;
+  B.tax = B.inn*d.tr*keep + B.over*d.tr;
+  C.tax = C.inn*(cOver1500?0.165:cRate) + C.over*0.165;
+  A.tax = 0;
+  const tax = B.tax+C.tax;
+  return { total, W, limit, inLim, A, B, C, keep, cRate, cOver1500, tax, net:W-tax, short:d.w>total };
+}
+
+function update(){
+  const d = { age:Math.round(num('age')), yr:Math.round(num('yr')), a:num('a'), b:num('b'), c:num('c'), tr:num('tr')/100, w:num('w') };
+  save();
+  $('sumVal').textContent = man(d.a+d.b+d.c);
+  $('wNote').textContent = d.w>0 ? `한 달에 약 ${man(d.w/12)}씩 꺼내는 셈입니다.` : '한 달 200만원씩이면 2,400만원입니다.';
+  const res = $('resBody');
+  if(!(d.age>=55 && d.age<=110 && d.yr>=1 && d.a+d.b+d.c>0 && d.w>0)){
+    res.innerHTML = `<p class="desc">${d.age>0&&d.age<55 ? '연금은 만 55세부터 받을 수 있습니다. 나이를 55세 이상으로 적어 주세요.' : '나이, 연금 받는 햇수, 계좌 잔액, 인출액을 입력하면 결과가 나타납니다.'}</p>`; return;
+  }
+  if(d.b>0 && d.tr<=0){ res.innerHTML = '<p class="desc">퇴직금이 있으면 퇴직소득세율을 함께 적어 주세요.</p>'; return; }
+
+  const r = calc(d), eff = r.W>0 ? r.tax/r.W*100 : 0;
+  const pc = v => (v*100).toFixed(1).replace(/\.0$/,'')+'%';
+  const rows = [
+    {n:'① 세액공제 안 받은 원금', s:r.A, col:'var(--sa)', rule:'세금 없음'},
+    {n:'② 퇴직금',                s:r.B, col:'var(--sb)', rule:`퇴직소득세율 ${pc(d.tr)}의 ${r.keep*100}%${r.B.over>0?' · 한도 초과분은 100%':''}`},
+    {n:'③ 공제받은 원금 + 수익',   s:r.C, col:'var(--sc)', rule:`${r.cOver1500?'1,500만원 초과 → 16.5%':'연금소득세 '+pc(r.cRate)}${r.C.over>0?' · 한도 초과분은 16.5%':''}`}
+  ];
+  const bar = rows.filter(x=>x.s.take>0).map(x=>`<div style="width:${x.s.take/r.W*100}%;background:${x.col}">${x.s.take/r.W>0.14?man(x.s.take):''}</div>`).join('');
+
+  // 경고와 안내
+  let al = '';
+  if(r.short) al += `<div class="alert bad"><b class="h">인출액이 계좌 잔액보다 많습니다</b>잔액 ${man(r.total)}까지만 계산했습니다.</div>`;
+  if(r.W>r.limit+0.5) al += `<div class="alert bad"><b class="h">연금수령한도를 ${man(r.W-r.limit)} 넘겼습니다</b>올해 한도는 ${man(r.limit)}입니다. 넘긴 부분은 연금으로 보지 않아 감면 없이 세금을 냅니다. 한도 안으로 줄이거나, 부족한 생활비는 다른 계좌에서 꺼내는 방법을 따져 보세요.</div>`;
+  else if(isFinite(r.limit)) al += `<div class="alert ok"><b class="h">연금수령한도 안입니다</b>올해 한도는 ${man(r.limit)}, 아직 ${man(r.limit-r.W)} 여유가 있습니다.</div>`;
+  else al += `<div class="alert ok"><b class="h">연금수령한도가 없습니다</b>11년차부터는 얼마를 꺼내도 연금으로 봅니다.</div>`;
+  if(r.cOver1500){
+    const low = r.C.inn*r.cRate, high = r.C.inn*0.165;
+    al += `<div class="alert mid"><b class="h">③번 돈이 한 해 1,500만원을 넘었습니다</b>③번에서 ${man(r.C.inn)}을 꺼내, 낮은 세율(${pc(r.cRate)}) 대신 전액 16.5%가 적용됩니다. 세금이 ${won(low)}에서 ${won(high)}으로 늘어납니다. 다른 소득이 적다면 종합과세로 신고하는 쪽이 유리할 수 있습니다.</div>`;
+  } else if(r.C.inn>0){
+    al += `<div class="alert ok"><b class="h">③번 돈은 1,500만원 이하입니다</b>③번에서 ${man(r.C.inn)}을 꺼냈고, ${man(1500-r.C.inn)}까지 더 꺼내도 낮은 세율이 유지됩니다.</div>`;
+  } else if(r.W>0){
+    const left = d.a+d.b-r.W;
+    al += `<div class="alert ok"><b class="h">아직 ③번 돈까지 가지 않았습니다</b>①·②번 돈이 ${man(left)} 더 남아 있습니다. 이 돈을 다 꺼낸 뒤부터 연금소득세와 1,500만원 기준이 적용됩니다.</div>`;
+  }
+
+  res.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="k">세금</div><div class="v">${won(r.tax)}</div></div>
+      <div class="kpi hot"><div class="k">손에 쥐는 돈 (월)</div><div class="v">${man(r.net/12)}</div></div>
+      <div class="kpi"><div class="k">실제 세율</div><div class="v">${eff.toFixed(1)}%</div></div>
+    </div>
+    <p class="note">올해 ${man(r.W)}을 꺼내 세금 ${won(r.tax)}을 내고 <b>${man(r.net)}</b>을 받습니다.</p>
+
+    <h3 class="sub">올해 꺼낸 돈은 어디서 나갔나</h3>
+    <div class="bar">${bar}</div>
+    <div class="lgd">${rows.map(x=>`<span><i style="background:${x.col}"></i>${x.n}</span>`).join('')}</div>
+    <div class="scroll"><table class="tb">
+      <tr><th>돈의 출처</th><th>꺼낸 돈</th><th>세금</th></tr>
+      ${rows.map(x=>`<tr><td>${x.n}<small>${x.rule}</small></td><td>${man(x.s.take)}</td><td>${won(x.s.tax)}</td></tr>`).join('')}
+      <tr class="tot"><td>합계</td><td>${man(r.W)}</td><td>${won(r.tax)}</td></tr>
+    </table></div>
+    ${al}
+
+    <div class="info">
+      <b>결과를 읽을 때</b>
+      <ul>
+        <li>①번 돈이 있으면 처음 몇 년은 세금이 0원입니다. 순서는 법으로 정해져 있어 바꿀 수 없습니다.</li>
+        <li>1,500만원 기준은 ③번 돈에만 적용됩니다. 국민연금과 ②번 퇴직금은 여기에 들어가지 않습니다.</li>
+        <li>인출액을 바꿔 가며 세금이 갑자기 늘어나는 지점을 찾아보세요. 그 지점이 한 해에 꺼낼 금액의 기준선입니다.</li>
+      </ul>
+    </div>`;
+}
+
+/* ── 저장/불러오기 ── */
+function save(){ try{ const v={}; IDS.forEach(k=>v[k]=$(k).value); localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} }
+function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) IDS.forEach(k=>$(k).value=s[k]||''); }catch(e){} }
+function fill(v){ IDS.forEach((k,i)=>$(k).value=v[i]); update(); }
+$('btnSample').addEventListener('click',()=>fill([60,1,2000,15000,13000,4,2400]));
+$('btnReset').addEventListener('click',()=>{
+  if(!confirm('입력한 내용을 모두 지울까요?')) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  fill(['','','','','','','']);
+});
+load(); update();
+</script>
+</body>
+</html>
