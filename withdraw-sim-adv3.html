@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>은퇴 연도 시뮬레이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --navy2:#2d5282; --orange:#F5A623; --orange-d:#b87400;
+    --ink:#1b2430; --sub:#5b6573; --line:#d5dce5; --bg:#f3f5f8; --card:#fff;
+    --soft:#eef3f9; --warm:#fff6e6; --good:#1f8a5b; --bad:#c2412d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',sans-serif;font-size:17px;line-height:1.6;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+  header{background:var(--navy);color:#fff;padding:22px 16px 20px}
+  header .in{max-width:720px;margin:0 auto}
+  header .eb{color:var(--orange);font-size:14px;font-weight:700}
+  header h1{font-size:26px;font-weight:900;line-height:1.3;margin:2px 0 6px}
+  header p{font-size:16px;opacity:.9}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+  .btn{font:700 16px 'Noto Sans KR',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .btn.ghost{border-color:var(--line);color:var(--sub)}
+
+  .card{background:var(--card);border-radius:14px;padding:20px 16px;margin-top:16px;box-shadow:0 1px 4px rgba(20,40,70,.08)}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .step .no{background:var(--navy);color:#fff;font-weight:900;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step h2{font-size:20px;font-weight:900;color:var(--navy)}
+  .desc{font-size:16px;color:var(--sub);margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label.f{display:block;font-size:16px;font-weight:700;margin-bottom:4px}
+  label.f small{font-weight:400;color:var(--sub)}
+  .inp{position:relative}
+  .inp input{width:100%;font:500 18px 'Noto Sans KR',sans-serif;padding:10px 52px 10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .inp input:focus{outline:none;border-color:var(--navy2)}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;pointer-events:none}
+  .seg{display:flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;min-width:0;font:700 16px 'Noto Sans KR',sans-serif;padding:10px 4px;border:0;background:#fff;color:var(--sub);cursor:pointer}
+  .seg button.on{background:var(--navy);color:#fff}
+  .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .gap{margin-top:14px}
+
+  .grp{font-size:15px;font-weight:700;color:var(--sub);margin:12px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font:700 16px 'Noto Sans KR',sans-serif;border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;text-align:left}
+  .chip small{display:block;font-weight:400;font-size:14px;color:var(--sub)}
+  .chip.on{border-color:var(--navy);background:var(--soft)}
+  .chip .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--line)}
+  .mymix{display:none;margin-top:12px;background:var(--soft);border-radius:12px;padding:12px}
+  .mymix.show{display:block}
+  .mix5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .mix5 label{font-size:14px;font-weight:700;display:block;margin-bottom:2px}
+  .mix5 input{width:100%;font:500 17px 'Noto Sans KR',sans-serif;padding:8px 6px;border:2px solid var(--line);border-radius:8px;text-align:right}
+  .years{display:flex;flex-wrap:wrap;gap:8px}
+  .years button{font:700 16px 'Noto Sans KR',sans-serif;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;color:var(--ink)}
+  .years button small{display:block;font-weight:400;font-size:13px;color:var(--sub)}
+  .years button.on{border-color:var(--navy);background:var(--navy);color:#fff}
+  .years button.on small{color:#dbe6f3}
+  input[type=range]{width:100%;margin-top:12px;accent-color:var(--navy);height:28px}
+  .yr-now{font-size:22px;font-weight:900;color:var(--navy)}
+
+  .result{border:3px solid var(--navy)}
+  .mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .mc{border:2px solid var(--line);border-radius:12px;padding:12px 10px;border-top-width:6px}
+  .mc h4{font-size:17px;font-weight:900;line-height:1.35}
+  .mc .k{font-size:14px;color:var(--sub);margin-top:8px}
+  .mc .v{font-size:18px;font-weight:900;line-height:1.3}
+  .mc .v.bad{color:var(--bad)} .mc .v.ok{color:var(--good)}
+  h3.sub{font-size:18px;color:var(--navy);margin-top:22px}
+  .chart svg{width:100%;height:auto;display:block;margin-top:6px}
+  .lgd{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;margin-top:4px}
+  .lgd i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  table.tb{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.tb th,table.tb td{border:1px solid var(--line);padding:7px 5px;text-align:center}
+  table.tb th{background:var(--soft);color:var(--navy)}
+  table.tb td:first-child{font-weight:700;background:#fafbfc;text-align:left}
+  .scroll{overflow-x:auto}
+  .verdict{border-radius:12px;padding:14px;margin-top:14px;font-size:16px;border:2px solid #f3d08e;background:var(--warm)}
+  .verdict b.h{display:block;font-size:19px;margin-bottom:2px;color:var(--orange-d)}
+  .warn{border-radius:12px;padding:10px 14px;margin-top:12px;font-size:15px;background:#fdf2f0;border:1px solid #f0c4bb;color:#7a2a1d}
+  .info{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:16px;margin-top:14px}
+  .info ul{padding-left:20px;margin-top:4px}
+  .info b{color:var(--navy)}
+  .src{font-size:14px;color:var(--sub);margin-top:24px;line-height:1.7}
+  .src b{color:var(--ink)}
+  footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
+  footer .brand{font-weight:900;color:var(--navy)}
+  .disc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+  @media (max-width:520px){
+    header h1{font-size:23px}
+    .mcards{grid-template-columns:1fr}
+    .mc{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+    .mc h4{grid-column:1/-1}
+    .mix5{grid-template-columns:repeat(3,1fr)}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="eb">서울 리[Re]테크 · 은퇴 포트폴리오 심화 3주차 실습 ①</div>
+  <h1>은퇴 연도 시뮬레이터</h1>
+  <p>같은 포트폴리오, 같은 인출률인데 은퇴한 해가 다르면 무엇이 달라질까</p>
+</div></header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="btnSample">예시 값 넣어보기</button>
+    <button class="btn ghost" id="btnReset">처음부터 다시</button>
+  </div>
+  <p class="note" id="loadNote">입력한 값은 이 기기에만 저장되어 다음 실습(인출계획표)에서 다시 불러옵니다. 어디로도 전송되지 않습니다.</p>
+
+  <section class="card">
+    <div class="step"><span class="no">1</span><h2>내 숫자</h2></div>
+    <div class="grid2">
+      <div><label class="f">인출 시작 나이</label><div class="inp"><input type="number" inputmode="numeric" id="age" placeholder="예: 60"><span class="u">세</span></div></div>
+      <div><label class="f">은퇴자산 <small>(금융자산)</small></label><div class="inp"><input type="number" inputmode="numeric" id="asset" placeholder="예: 50000"><span class="u">만원</span></div></div>
+    </div>
+    <div class="grid2 gap">
+      <div><label class="f">첫해 인출률</label><div class="inp"><input type="number" inputmode="decimal" id="rate" step="0.1" placeholder="예: 4"><span class="u">%</span></div></div>
+      <div><label class="f">인출 기간</label><div class="seg" id="yrsSeg"><button data-v="25">25년</button><button data-v="30">30년</button><button data-v="35">35년</button></div></div>
+    </div>
+    <p class="note" id="rateNote">첫해 인출액을 해마다 물가만큼 올려 꺼낸다고 봅니다. (2주차의 정액 인출)</p>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">2</span><h2>포트폴리오 고르기 <small style="font-size:15px;color:var(--sub);font-weight:500">(최대 3개)</small></h2></div>
+    <div class="grp">1주차에 본 배분법</div>
+    <div class="chips" id="chipsA"></div>
+    <div class="grp">투자 현인들의 규칙</div>
+    <div class="chips" id="chipsB"></div>
+    <div class="grp">내 것</div>
+    <div class="chips" id="chipsC"></div>
+    <div class="mymix" id="mymix">
+      <p class="note" style="margin:0 0 8px">내 배분 비율 (%)</p>
+      <div class="mix5" id="mix5"></div>
+      <p class="note" id="mixNote"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">3</span><h2>은퇴한 해 고르기</h2></div>
+    <div class="years" id="years"></div>
+    <input type="range" id="yr" min="1928" max="2025" step="1">
+    <p class="note">선택한 해: <span class="yr-now" id="yrNow"></span>년 1월에 인출 시작</p>
+  </section>
+
+  <section class="card result">
+    <div class="step"><span class="no">✓</span><h2>결과</h2></div>
+    <div id="resBody"></div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="no">📜</span><h2>100년 성적표</h2></div>
+    <p class="desc">1928년부터 은퇴한 사람들을 한 해씩 모두 돌려 봤습니다. 인출 기간을 끝까지 버틴 경우가 몇 번인지 셉니다.</p>
+    <div id="histBody"></div>
+  </section>
+
+  <div class="src">
+    <b>계산 방식</b><br>
+    · 미국 자산의 실제 연간 수익률(1928~2025년)을 그대로 씁니다. 주식은 S&amp;P500(배당 포함), 채권은 미국 10년 국채, 현금은 3개월 국채, 금은 금 가격입니다.<br>
+    · 매년 초에 인출하고, 남은 돈에 그해 수익률을 곱합니다. 인출액은 해마다 미국 소비자물가(12월 기준)만큼 올립니다. 매년 비율을 처음대로 다시 맞춥니다. 세금과 수수료는 넣지 않았습니다.<br>
+    · 결과 금액은 모두 물가를 걷어낸 은퇴 첫해 가치입니다.<br>
+    · 내 배분: 국내주식·해외주식 → 주식, 채권 → 10년 국채, 리츠·대체·금 → 금, 예금·현금 → 3개월 국채로 대신했습니다. 한국 자산의 실제 성과와는 다릅니다.<br>
+    · 올웨더는 원자재 몫을 금으로 대신한 근사치입니다. 1971년 이전 금 가격은 정부가 고정한 값이라, 그 전에 은퇴한 경우 금이 들어간 포트폴리오의 결과는 해석에 주의하세요.<br>
+    · 2025년까지 기간이 모자라면 2025년 말까지만 계산합니다.<br><br>
+    <b>자료와 참고 문헌</b><br>
+    · 수익률: Aswath Damodaran, Historical Returns on Stocks, Bonds, Bills and Real Estate (NYU Stern, 2026년 1월 갱신)<br>
+    · 물가: 미국 노동통계국 CPI-U (FRED CPIAUCNS)<br>
+    · 버핏: Berkshire Hathaway 2013 주주서한 · 그레이엄: 『현명한 투자자』 · 보글: 언론 인터뷰(2009) · 영구: Harry Browne, Fail-Safe Investing (1999) · 올웨더: Bridgewater, The All Weather Story
+  </div>
+
+  <footer>
+    <div class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</div>
+    <div class="disc">본 계산기는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. 과거 미국 시장의 기록이며 미래 수익을 보장하지 않습니다. 정확한 판단은 전문가 상담을 통해 확인하시기 바랍니다.</div>
+  </footer>
+</div>
+
+<script>
+/* ── 미국 연간 수익률(%)과 물가(%), 1928~2025 · Damodaran(NYU Stern) / FRED CPI-U ── */
+const Y0=1928, Y1=2025;
+const R={
+ sp:[43.81,-8.3,-25.12,-43.84,-8.64,49.98,-1.19,46.74,31.94,-35.34,29.28,-1.1,-10.67,-12.77,19.17,25.06,19.03,35.82,-8.43,5.2,5.7,18.3,30.81,23.68,18.15,-1.21,52.56,32.6,7.44,-10.46,43.72,12.06,0.34,26.64,-8.81,22.61,16.42,12.4,-9.97,23.8,10.81,-8.24,3.56,14.22,18.76,-14.31,-25.9,37,23.83,-6.98,6.51,18.52,31.74,-4.7,20.42,22.34,6.15,31.24,18.49,5.81,16.54,31.48,-3.06,30.23,7.49,9.97,1.33,37.2,22.68,33.1,28.34,20.89,-9.03,-11.85,-21.97,28.36,10.74,4.83,15.61,5.48,-36.55,25.94,14.82,2.1,15.89,32.15,13.52,1.38,11.77,21.61,-4.23,31.21,18.02,28.47,-18.04,26.06,24.88,17.78],
+ tb:[3.08,3.16,4.55,2.31,1.07,0.96,0.28,0.17,0.17,0.28,0.07,0.05,0.04,0.13,0.34,0.38,0.38,0.38,0.38,0.6,1.05,1.12,1.2,1.52,1.72,1.89,0.94,1.72,2.62,3.22,1.77,3.39,2.87,2.35,2.77,3.16,3.55,3.95,4.86,4.29,5.34,6.67,6.39,4.33,4.06,7.04,7.85,5.79,4.98,5.26,7.18,10.05,11.39,14.04,11.09,8.95,9.92,7.72,6.15,5.96,6.89,8.39,7.75,5.54,3.51,3.07,4.37,5.66,5.15,5.2,4.91,4.78,6,3.48,1.64,1.03,1.4,3.22,4.85,4.48,1.4,0.15,0.14,0.05,0.09,0.06,0.03,0.05,0.32,0.95,1.97,2.11,0.36,0.04,2.09,5.28,5.18,4.21],
+ bd:[0.84,4.2,4.54,-2.56,8.79,1.86,7.96,4.47,5.02,1.38,4.21,4.41,5.4,-2.02,2.29,2.49,2.58,3.8,3.13,0.92,1.95,4.66,0.43,-0.3,2.27,4.14,3.29,-1.34,-2.26,6.8,-2.1,-2.65,11.64,2.06,5.69,1.68,3.73,0.72,2.91,-1.58,3.27,-5.01,16.75,9.79,2.82,3.66,1.99,3.61,15.98,1.29,-0.78,0.67,-2.99,8.2,32.81,3.2,13.73,25.71,24.28,-4.96,8.22,17.69,6.24,15,9.36,14.21,-8.04,23.48,1.43,9.94,14.92,-8.25,16.66,5.57,15.12,0.38,4.49,2.87,1.96,10.21,20.1,-11.12,8.46,16.04,2.97,-9.1,10.75,1.28,0.69,2.8,-0.02,9.64,11.33,-4.42,-17.83,3.88,-1.64,7.8],
+ gd:[0.1,-0.15,0.1,-17.38,21.28,27.26,31.75,0.43,0.09,-0.23,0.17,-1.23,-1.66,0,0,0,0,2.54,0,0,0,-8.7,9.56,0,-0.35,0.69,0.57,-0.03,-0.11,-0.11,0.43,0,0.48,-0.06,-0.06,-0.4,0.03,0.06,0.03,-0.51,12.47,5.01,-9.45,16.69,48.78,72.96,66.15,-24.8,-4.1,22.64,37.01,126.55,15.19,-32.6,15.62,-16.8,-19.38,6,18.96,24.53,-15.26,-2.84,-3.11,-8.56,-5.73,17.68,-2.17,0.98,-4.59,-21.41,-0.83,0.85,-5.44,0.75,25.57,19.89,4.65,17.77,23.2,31.92,4.32,25.04,29.24,12.02,5.68,-27.61,0.12,-12.11,8.1,12.66,-0.93,19.08,24.17,-3.75,0.55,13.26,25.96,66.22]
+};
+const INF=[-1.16,0.58,-6.4,-9.32,-10.27,0.76,1.52,2.99,1.45,2.86,-2.78,0,0.71,9.93,9.03,2.96,2.3,2.25,18.13,8.84,2.99,-2.07,5.93,6,0.75,0.75,-0.74,0.37,2.99,2.9,1.76,1.73,1.36,0.67,1.33,1.64,0.97,1.92,3.46,3.04,4.72,6.2,5.57,3.27,3.41,8.71,12.34,6.94,4.86,6.7,9.02,13.29,12.52,8.92,3.83,3.79,3.95,3.8,1.1,4.43,4.42,4.65,6.11,3.06,2.9,2.75,2.67,2.54,3.32,1.7,1.61,2.68,3.39,1.55,2.38,1.88,3.26,3.42,2.54,4.08,0.09,2.72,1.5,2.96,1.74,1.5,0.76,0.73,2.07,2.11,1.91,2.29,1.36,7.04,6.45,3.35,2.89,2.68];
+
+const KEY='retech_adv_sim_v1', KEY2='retech_adv_withdraw_v1', KEY1='retech_adv_portfolio_v1';
+const COLS=['#1E3A5F','#F5A623','#1f8a5b'];
+// mix(k, age): k = 인출 몇 년차(0부터), age = 인출 시작 나이 → {sp,bd,tb,gd} 합계 1
+const PF=[
+  {k:'us',  g:'A', name:'미국주식 100%',  sub:'비교 기준선',             mix:()=>({sp:1})},
+  {k:'6040',g:'A', name:'60/40',          sub:'주식 60 · 채권 40',        mix:()=>({sp:.6,bd:.4})},
+  {k:'perm',g:'A', name:'영구 포트폴리오', sub:'주식·채권·현금·금 25씩',   mix:()=>({sp:.25,bd:.25,tb:.25,gd:.25}), gold:true},
+  {k:'aw',  g:'A', name:'올웨더 (근사)',   sub:'주식 30 · 채권 55 · 금 15',mix:()=>({sp:.3,bd:.55,gd:.15}), gold:true},
+  {k:'buf', g:'B', name:'버핏 90/10',     sub:'주식 90 · 단기국채 10',    mix:()=>({sp:.9,tb:.1})},
+  {k:'gra', g:'B', name:'그레이엄 50/50', sub:'주식 50 · 채권 50',        mix:()=>({sp:.5,bd:.5})},
+  {k:'bo1', g:'B', name:'보글 · 나이만큼 채권', sub:'60세면 채권 60, 해마다 +1', mix:(k,a)=>{const b=Math.min(1,Math.max(0,(a+k)/100)); return {sp:1-b,bd:b};}},
+  {k:'bo2', g:'B', name:'보글 · 120−나이 주식', sub:'60세면 주식 60, 해마다 −1', mix:(k,a)=>{const s=Math.min(1,Math.max(0,(120-a-k)/100)); return {sp:s,bd:1-s};}},
+  {k:'my',  g:'C', name:'내 배분',        sub:'1주차 설계기 5칸',          mix:()=>myMix()}
+];
+const QUICK=[[1929,'대공황'],[1966,'고물가 시작'],[1973,'오일쇼크'],[2000,'닷컴 붕괴'],[2008,'금융위기'],[2009,'바닥에서 시작']];
+const MIXK=[['ks','국내주식','sp'],['gs','해외주식','sp'],['bd','채권','bd'],['alt','리츠·대체·금','gd'],['cash','예금·현금','tb']];
+
+const $=id=>document.getElementById(id);
+const state={yrs:30, picks:['us','6040','perm'], start:2000};
+
+function num(id){ const v=parseFloat($(id).value); return isFinite(v)?v:NaN; }
+function man(v){ v=Math.round(v); if(v<0) v=0; const e=Math.floor(v/10000), r=v%10000; return e?`${e}억`+(r?` ${r.toLocaleString()}만원`:'원'):`${r.toLocaleString()}만원`; }
+function eok(v){ return v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만'; }
+
+/* ── 내 배분 ── */
+function myMix(){
+  const v={}; let tot=0;
+  MIXK.forEach(([k])=>{ const x=parseFloat($('m_'+k).value)||0; v[k]=Math.max(0,x); tot+=v[k]; });
+  if(tot<=0) return null;
+  const m={sp:0,bd:0,tb:0,gd:0};
+  MIXK.forEach(([k,,a])=>m[a]+=v[k]/tot);
+  return m;
+}
+
+/* ── 한 사람의 은퇴: 실질(은퇴 첫해 가치) 기준 결과 ── */
+function simulate(p, start, n, age, A, rate){
+  const len=Math.min(n, Y1-start+1);
+  let bal=A, w=A*rate, defl=1, dead=null, total=0; const B=[], minB={v:A,t:0};
+  for(let t=0;t<len;t++){
+    const i=start-Y0+t;
+    if(t>0){ const f=1+INF[i-1]/100; w*=f; defl*=f; }
+    const take=Math.min(w, Math.max(bal,0));
+    if(take<w-1e-6 && dead===null) dead=t;
+    total+=take/defl;
+    const m=p.mix(t,age); if(!m) return null;
+    const r=Object.keys(m).reduce((s,a)=>s+m[a]*R[a][i]/100,0);
+    bal=(bal-take)*(1+r);
+    const real=Math.max(0,bal)/(defl*(1+INF[i]/100));
+    B.push(real); if(real<minB.v){minB.v=real;minB.t=t+1;}
+  }
+  return {len, dead, B, total, end:B[B.length-1], min:minB};
+}
+
+/* ── 100년: 인출 기간 n년을 끝까지 채울 수 있는 은퇴 연도 전체 ── */
+function history(p, n, age, rate){
+  let ok=0, cnt=0, worst=null;
+  for(let s=Y0;s+n-1<=Y1;s++){
+    const r=simulate(p,s,n,age,1,rate); if(!r) return null;
+    cnt++; if(r.dead===null) ok++;
+    const score=r.dead===null?n+r.end:r.dead;
+    if(!worst||score<worst.score) worst={s,score,dead:r.dead};
+  }
+  return {ok,cnt,worst};
+}
+
+/* ── 선 그래프 ── */
+function lineChart(series, start, len, age){
+  const W=680,Hh=300,L=62,R2=14,Tp=14,Bm=50, pw=W-L-R2, ph=Hh-Tp-Bm;
+  const max=Math.max(1,...series.flatMap(s=>s.d))*1.08;
+  const X=i=>L+pw*i/Math.max(1,len), Y=v=>Tp+ph*(1-v/max);
+  let g='';
+  for(let i=0;i<=4;i++){ const v=max*i/4, y=Y(v);
+    g+=`<line x1="${L}" y1="${y}" x2="${W-R2}" y2="${y}" stroke="#d5dce5" stroke-width="1"/><text x="${L-6}" y="${y+5}" text-anchor="end" font-size="14" fill="#5b6573">${(v/10000).toFixed(1)}억</text>`; }
+  const step=len>20?5:len>10?3:1;
+  for(let i=0;i<=len;i+=step){ g+=`<text x="${X(i)}" y="${Hh-28}" text-anchor="middle" font-size="14" fill="#5b6573">${start+i}</text><text x="${X(i)}" y="${Hh-10}" text-anchor="middle" font-size="13" fill="#8a94a0">${age+i}세</text>`; }
+  series.forEach(s=>{ const pts=[s.a,...s.d].map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+    g+=`<polyline fill="none" stroke="${s.col}" stroke-width="3.5" stroke-linejoin="round" points="${pts}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="연도별 남은 자산">${g}</svg>`;
+}
+
+/* ── 화면 ── */
+function chip(p){
+  return `<button class="chip" data-k="${p.k}"><span class="dot"></span>${p.name}<small>${p.sub}</small></button>`;
+}
+function drawChips(){
+  ['A','B','C'].forEach(g=>$('chips'+g).innerHTML=PF.filter(p=>p.g===g).map(chip).join(''));
+  document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.k, i=state.picks.indexOf(k);
+    if(i>=0) state.picks.splice(i,1);
+    else { if(state.picks.length>=3) state.picks.shift(); state.picks.push(k); }
+    paint(); update();
+  }));
+  $('mix5').innerHTML=MIXK.map(([k,n])=>`<div><label for="m_${k}">${n}</label><input type="number" inputmode="decimal" id="m_${k}" placeholder="0"></div>`).join('');
+  MIXK.forEach(([k])=>$('m_'+k).addEventListener('input',update));
+  $('years').innerHTML=QUICK.map(([y,t])=>`<button data-y="${y}">${y}<small>${t}</small></button>`).join('');
+  document.querySelectorAll('#years button').forEach(b=>b.addEventListener('click',()=>{ state.start=+b.dataset.y; paint(); update(); }));
+}
+function paint(){
+  $('yrsSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.v===state.yrs));
+  document.querySelectorAll('.chip').forEach(b=>{
+    const i=state.picks.indexOf(b.dataset.k); b.classList.toggle('on',i>=0);
+    b.querySelector('.dot').style.background=i>=0?COLS[i]:'';
+  });
+  $('mymix').classList.toggle('show',state.picks.includes('my'));
+  document.querySelectorAll('#years button').forEach(b=>b.classList.toggle('on',+b.dataset.y===state.start));
+  $('yr').value=state.start; $('yrNow').textContent=state.start;
+}
+$('yrsSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ state.yrs=+b.dataset.v; paint(); update(); }));
+$('yr').addEventListener('input',e=>{ state.start=+e.target.value; paint(); update(); });
+['age','asset','rate'].forEach(id=>$(id).addEventListener('input',update));
+
+function update(){
+  const age=Math.round(num('age')), A=num('asset'), rate=num('rate')/100, n=state.yrs, start=state.start;
+  save();
+  const ok=age>=40&&age<=90 && A>0 && rate>0&&rate<=0.15;
+  $('rateNote').innerHTML=(A>0&&rate>0)?`첫해에 <b>${man(A*rate)}</b>, 한 달에 약 <b>${man(A*rate/12)}</b>을 꺼내고, 해마다 물가만큼 올립니다.`:'첫해 인출액을 해마다 물가만큼 올려 꺼낸다고 봅니다. (2주차의 정액 인출)';
+  const mm=myMix();
+  $('mixNote').textContent=state.picks.includes('my')&&!mm?'다섯 칸 중 하나 이상 입력하면 계산합니다. 금액이나 비율 아무거나 넣어도 됩니다.':'합계가 100이 아니어도 비율로 맞춰 계산합니다.';
+  const res=$('resBody'), hist=$('histBody');
+  const picks=state.picks.map(k=>PF.find(p=>p.k===k)).filter(p=>p.k!=='my'||mm);
+  if(!ok||!picks.length){
+    const msg='<p class="desc">나이, 은퇴자산, 인출률을 입력하고 포트폴리오를 하나 이상 고르면 결과가 나타납니다.</p>';
+    res.innerHTML=msg; hist.innerHTML=msg; return;
+  }
+  const sims=picks.map((p,i)=>({p,col:COLS[state.picks.indexOf(p.k)],s:simulate(p,start,n,age,A,rate)}));
+  const len=sims[0].s.len, cut=len<n;
+
+  const cards=sims.map(({p,col,s})=>{
+    const life=s.dead===null
+      ? `<div class="v ok">${cut?`${start+len-1}년 말까지 유지`:`${age+n}세까지 유지`}</div>`
+      : `<div class="v bad">${age+s.dead}세에 바닥 (${start+s.dead}년)</div>`;
+    return `<div class="mc" style="border-top-color:${col}">
+      <h4>${p.name}</h4>
+      <div><div class="k">자산 수명</div>${life}</div>
+      <div><div class="k">가장 적게 남은 때</div><div class="v">${eok(s.min.v)}</div></div>
+      <div><div class="k">${cut?`${start+len-1}년 말`:`${age+n}세`}에 남는 돈</div><div class="v">${eok(s.end)}</div></div>
+    </div>`;
+  }).join('');
+
+  const best=[...sims].sort((a,b)=>(a.s.dead===null?1e9+a.s.end:a.s.dead)-(b.s.dead===null?1e9+b.s.end:b.s.dead));
+  const lo=best[0], hi=best[best.length-1];
+  let v;
+  if(sims.length===1) v=`<b class="h">${start}년에 은퇴한 ${lo.p.name}</b>위의 은퇴 연도 버튼을 바꿔 가며 같은 포트폴리오가 어떻게 달라지는지 보세요. 2000년과 2009년을 비교해 보면 차이가 큽니다.`;
+  else if(lo.s.dead!==null && hi.s.dead===null) v=`<b class="h">같은 해 은퇴했는데 ${lo.p.name}는 ${age+lo.s.dead}세에 바닥, ${hi.p.name}는 끝까지 버텼습니다</b>은퇴 직후 몇 년의 시장이 결과를 갈랐습니다. 은퇴 연도를 바꾸면 순위가 뒤집히기도 합니다.`;
+  else if(lo.s.dead!==null) v=`<b class="h">이 해에 은퇴했다면 고른 포트폴리오가 모두 바닥났습니다</b>인출률을 0.5%p씩 낮춰 보세요. 어디서부터 버티는지가 이 시기의 안전한 인출률입니다.`;
+  else v=`<b class="h">모두 버텼지만 남은 돈은 ${eok(lo.s.end)}부터 ${eok(hi.s.end)}까지 다릅니다</b>가장 적게 남았던 때도 함께 보세요. 그 바닥을 마음 편히 지나갈 수 있는지가 진짜 기준입니다.`;
+
+  const goldWarn=start<1971&&sims.some(x=>x.p.gold||(x.p.k==='my'&&mm&&mm.gd>0))?'<div class="warn">1971년 이전 금 가격은 정부가 고정한 값이라, 금이 들어간 포트폴리오의 이 시기 결과는 실제와 다를 수 있습니다.</div>':'';
+  const cutNote=cut?`<p class="note">${start}년에 은퇴하면 2025년 말까지 ${len}년치 기록만 있어 그때까지만 계산했습니다.</p>`:'';
+
+  res.innerHTML=`
+    <div class="mcards">${cards}</div>
+    <div class="verdict">${v}</div>${goldWarn}
+    <h3 class="sub">해마다 남은 자산 (은퇴 첫해 가치)</h3>
+    <div class="chart">${lineChart(sims.map(x=>({col:x.col,a:A,d:x.s.B})),start,len,age)}</div>
+    <div class="lgd">${sims.map(x=>`<span><i style="background:${x.col}"></i>${x.p.name}</span>`).join('')}</div>${cutNote}
+    <div class="info"><b>결과를 읽을 때</b><ul>
+      <li>2000년과 2009년을 번갈아 눌러 보세요. 포트폴리오는 그대로인데 은퇴 첫 10년의 시장이 결과를 바꿉니다.</li>
+      <li>미국 자료입니다. 원화와 코스피로 투자한 실제 결과와는 다릅니다. 방향을 보는 도구로 쓰세요.</li>
+    </ul></div>`;
+
+  const r2=Math.round((rate*100+1)*10)/10;
+  const rows=picks.map(p=>{
+    const a=history(p,n,age,rate), b=history(p,n,age,rate+0.01);
+    return `<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COLS[state.picks.indexOf(p.k)]};margin-right:6px"></i>${p.name}</td><td><b>${a.ok}</b> / ${a.cnt}</td><td>${b.ok} / ${b.cnt}</td><td>${a.worst.s}년${a.worst.dead!==null?` (${a.worst.dead}년 만에 바닥)`:''}</td></tr>`;
+  }).join('');
+  hist.innerHTML=`<div class="scroll"><table class="tb">
+      <tr><th>포트폴리오</th><th>인출률 ${(rate*100).toFixed(1)}%</th><th>${r2.toFixed(1)}%라면</th><th>가장 나빴던 은퇴 연도</th></tr>${rows}
+    </table></div>
+    <p class="note">${n}년을 채울 수 있는 은퇴 연도(1928~${Y1-n+1}년) 전체를 셉니다. 인출률이 1%p만 올라가도 버틴 횟수가 크게 줄어드는 것을 보세요.</p>
+    <div class="info"><b>단순한 배분도 상위권입니다</b><ul><li>버핏 90/10, 60/40처럼 펀드 두 개면 만들 수 있는 배분이 100년 성적표에서 복잡한 배분에 밀리지 않습니다. 결과를 가르는 것은 상품의 개수보다 인출률과 은퇴 연도입니다.</li></ul></div>`;
+}
+
+/* ── 저장/불러오기 ── */
+function save(){
+  try{
+    const mv={}; MIXK.forEach(([k])=>mv[k]=$('m_'+k).value);
+    localStorage.setItem(KEY,JSON.stringify({yrs:state.yrs,picks:state.picks,start:state.start,age:$('age').value,asset:$('asset').value,rate:$('rate').value,mix:mv,
+      names:state.picks.map(k=>PF.find(p=>p.k===k).name)}));
+  }catch(e){}
+}
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s){
+      state.yrs=s.yrs||30; state.picks=s.picks||state.picks; state.start=s.start||2000;
+      ['age','asset','rate'].forEach(k=>$(k).value=s[k]||'');
+      if(s.mix) MIXK.forEach(([k])=>$('m_'+k).value=s.mix[k]||'');
+      return;
+    }
+    const msgs=[];
+    const w=JSON.parse(localStorage.getItem(KEY2)||'null');
+    if(w){ ['age','asset','rate'].forEach(k=>{ if(w[k]) $(k).value=w[k]; }); if([25,30,35].includes(+w.yrs)) state.yrs=+w.yrs; msgs.push('2주차 인출방식 비교기의 나이·자산·인출률'); }
+    const p=JSON.parse(localStorage.getItem(KEY1)||'null');
+    if(p&&p.v){
+      MIXK.forEach(([k])=>$('m_'+k).value=p.v[k]||'');
+      if(!$('age').value&&p.ret) $('age').value=p.ret;
+      if(myMix()){ state.picks=['us','6040','my']; msgs.push('1주차 설계기의 내 배분'); }
+    }
+    if(msgs.length) $('loadNote').textContent=msgs.join('과 ')+'을 불러왔습니다. 값은 이 기기에만 저장됩니다.';
+  }catch(e){}
+}
+$('btnSample').addEventListener('click',()=>{
+  $('age').value=60; $('asset').value=50000; $('rate').value=4; state.yrs=30; state.picks=['us','6040','perm']; state.start=2000; paint(); update();
+});
+$('btnReset').addEventListener('click',()=>{
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  ['age','asset','rate'].forEach(k=>$(k).value=''); MIXK.forEach(([k])=>$('m_'+k).value='');
+  state.yrs=30; state.picks=['us','6040','perm']; state.start=2000;
+  $('loadNote').textContent='입력한 값은 이 기기에만 저장되어 다음 실습(인출계획표)에서 다시 불러옵니다. 어디로도 전송되지 않습니다.';
+  paint(); update();
+});
+
+drawChips(); load(); paint(); update();
+</script>
+</body>
+</html>

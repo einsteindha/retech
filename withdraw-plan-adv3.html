@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나만의 인출계획표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E3A5F; --navy2:#2d5282; --orange:#F5A623; --orange-d:#b87400;
+    --ink:#1b2430; --sub:#5b6573; --line:#d5dce5; --bg:#f3f5f8; --card:#fff;
+    --soft:#eef3f9; --warm:#fff6e6; --good:#1f8a5b; --bad:#c2412d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',sans-serif;font-size:17px;line-height:1.6;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+  header{background:var(--navy);color:#fff;padding:22px 16px 20px}
+  header .in{max-width:720px;margin:0 auto}
+  header .eb{color:var(--orange);font-size:14px;font-weight:700}
+  header h1{font-size:26px;font-weight:900;line-height:1.3;margin:2px 0 6px}
+  header p{font-size:16px;opacity:.9}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+  .btn{font:700 16px 'Noto Sans KR',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .btn.main{background:var(--navy);color:#fff}
+  .btn.ghost{border-color:var(--line);color:var(--sub)}
+
+  .card{background:var(--card);border-radius:14px;padding:20px 16px;margin-top:16px;box-shadow:0 1px 4px rgba(20,40,70,.08)}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .step .no{background:var(--navy);color:#fff;font-weight:900;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step h2{font-size:20px;font-weight:900;color:var(--navy)}
+  .desc{font-size:16px;color:var(--sub);margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label.f{display:block;font-size:16px;font-weight:700;margin-bottom:4px}
+  label.f small{font-weight:400;color:var(--sub)}
+  .inp{position:relative}
+  .inp input,.inp select{width:100%;font:500 18px 'Noto Sans KR',sans-serif;padding:10px 52px 10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .inp select{padding-right:12px}
+  .inp input:focus,.inp select:focus,textarea:focus{outline:none;border-color:var(--navy2)}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;pointer-events:none}
+  .seg{display:flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;min-width:0;font:700 16px 'Noto Sans KR',sans-serif;padding:10px 4px;border:0;background:#fff;color:var(--sub);cursor:pointer}
+  .seg button.on{background:var(--navy);color:#fff}
+  .note{font-size:15px;color:var(--sub);margin-top:6px}
+  .gap{margin-top:14px}
+  textarea{width:100%;font:500 17px 'Noto Sans KR',sans-serif;padding:10px 12px;border:2px solid var(--line);border-radius:10px;resize:vertical;min-height:52px;color:var(--ink)}
+  .rule{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+  .rule .n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--orange);color:var(--navy);font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:10px}
+  .rule .b{flex:1}
+  .rule .b label{font-size:15px;font-weight:700;color:var(--sub)}
+
+  /* 계획표 */
+  .sheet{border:3px solid var(--navy);background:#fff}
+  .sheet h2.t{font-size:22px;font-weight:900;color:var(--navy)}
+  .sheet .who{font-size:15px;color:var(--sub);margin-bottom:10px}
+  .blk{border-top:1px solid var(--line);padding:12px 0}
+  .blk h3{font-size:16px;font-weight:900;color:var(--orange-d);margin-bottom:6px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:16px}
+  .kv dt{color:var(--sub)}
+  .kv dd{font-weight:700}
+  .bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:6px 0 4px}
+  .bar span{display:block;height:100%}
+  .lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px;color:var(--sub)}
+  .lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  table.tb{width:100%;border-collapse:collapse;font-size:16px;margin-top:6px}
+  table.tb th,table.tb td{border:1px solid var(--line);padding:6px 5px;text-align:center}
+  table.tb th{background:var(--soft);color:var(--navy)}
+  table.tb td:first-child{font-weight:700;background:#fafbfc}
+  .simple{background:var(--warm);border:2px solid #f3d08e;border-radius:12px;padding:12px 14px}
+  .simple h3{color:var(--orange-d)}
+  .simple ol{padding-left:22px;font-size:17px;font-weight:700}
+  .simple ol li{margin:2px 0}
+  .empty{color:var(--sub);font-weight:400}
+  .gapmsg{font-size:16px;margin-top:6px}
+  .gapmsg b{color:var(--bad)}
+  .gapmsg b.ok{color:var(--good)}
+  .src{font-size:14px;color:var(--sub);margin-top:24px;line-height:1.7}
+  footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
+  footer .brand{font-weight:900;color:var(--navy)}
+  .disc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+  @media (max-width:520px){ header h1{font-size:23px} .kv{grid-template-columns:1fr} .kv dd{margin-bottom:4px} }
+
+  @media print{
+    @page{size:A4;margin:12mm}
+    body{background:#fff;font-size:12.5px}
+    header,.toolbar,.loadnote,.edit,.src,.noprint{display:none!important}
+    .wrap{max-width:none;padding:0}
+    .card{box-shadow:none;margin:0;padding:0}
+    .sheet{border:0}
+    .sheet h2.t{font-size:19px}
+    .blk{padding:7px 0}
+    .blk h3{font-size:13.5px;margin-bottom:3px}
+    .kv,table.tb,.simple ol,.gapmsg{font-size:12.5px}
+    .note{font-size:11.5px}
+    table.tb th,table.tb td{padding:3px 4px}
+    footer{margin-top:8px;padding-top:6px;font-size:11px}
+    .disc{font-size:11px;padding:6px 8px}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="eb">서울 리[Re]테크 · 은퇴 포트폴리오 심화 3주차 실습 ②</div>
+  <h1>나만의 인출계획표</h1>
+  <p>3주 동안 만든 숫자를 한 장으로. 마지막은 나의 심플 규칙 3줄</p>
+</div></header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn main" id="btnPrint">인쇄 · PDF로 저장</button>
+    <button class="btn" id="btnSample">예시 값 넣어보기</button>
+    <button class="btn ghost" id="btnReset">처음부터 다시</button>
+  </div>
+  <p class="note loadnote" id="loadNote">입력한 값은 이 기기에만 저장됩니다. 어디로도 전송되지 않습니다.</p>
+
+  <section class="card edit">
+    <div class="step"><span class="no">1</span><h2>생활비와 다른 소득</h2></div>
+    <div class="grid2">
+      <div><label class="f">은퇴 후 한 달 생활비</label><div class="inp"><input type="number" inputmode="numeric" id="need" placeholder="예: 300"><span class="u">만원</span></div></div>
+      <div><label class="f">연금 등 다른 소득 <small>(월)</small></label><div class="inp"><input type="number" inputmode="numeric" id="other" placeholder="예: 130"><span class="u">만원</span></div></div>
+    </div>
+    <div class="grid2 gap">
+      <div><label class="f">인출 시작 나이</label><div class="inp"><input type="number" inputmode="numeric" id="age" placeholder="예: 60"><span class="u">세</span></div></div>
+      <div><label class="f">은퇴자산 <small>(금융자산)</small></label><div class="inp"><input type="number" inputmode="numeric" id="asset" placeholder="예: 50000"><span class="u">만원</span></div></div>
+    </div>
+    <p class="note">국민연금, 퇴직연금 연금 수령분, 임대·근로소득처럼 자산을 헐지 않고 들어오는 돈을 "다른 소득"에 적습니다.</p>
+  </section>
+
+  <section class="card edit">
+    <div class="step"><span class="no">2</span><h2>인출 규칙</h2></div>
+    <label class="f">인출액을 해마다 어떻게 올릴까</label>
+    <div class="seg" id="incSeg"><button data-v="full">물가만큼</button><button data-v="half">물가의 절반</button><button data-v="grd">가드레일</button></div>
+    <p class="note" id="incNote"></p>
+    <div class="grid2 gap">
+      <div><label class="f">현금 버퍼</label><div class="inp"><select id="buf"><option value="0">두지 않음</option><option value="1">1년 치</option><option value="2" selected>2년 치</option><option value="3">3년 치</option></select></div></div>
+      <div><label class="f">연 1회 점검하는 달</label><div class="inp"><select id="chk"></select></div></div>
+    </div>
+    <div class="gap"><label class="f">이럴 때 줄인다</label>
+      <div class="inp"><select id="cut">
+        <option value="a">잔액이 처음보다 20% 줄면 인출액 10% 줄이기</option>
+        <option value="b">주식이 한 해 20% 넘게 빠지면 다음 해 물가 인상 건너뛰기</option>
+        <option value="c">현금 버퍼가 1년 치 아래로 내려가면 여행·큰 지출 미루기</option>
+      </select></div>
+    </div>
+  </section>
+
+  <section class="card edit">
+    <div class="step"><span class="no">3</span><h2>나의 심플 규칙 3줄</h2></div>
+    <p class="desc">전문가들의 실제 포트폴리오는 생각보다 단순했습니다. 내 계획도 세 줄로 줄여 봅니다.</p>
+    <div class="rule"><span class="n">1</span><div class="b"><label for="r1">무엇을 들고 있을까</label><textarea id="r1" rows="2" placeholder="예: 주식 인덱스펀드 50, 채권형 40, 현금 10. 펀드는 세 개만."></textarea></div></div>
+    <div class="rule"><span class="n">2</span><div class="b"><label for="r2">얼마씩, 언제 점검할까</label><textarea id="r2" rows="2" placeholder="예: 매달 120만원. 매년 3월에 한 번만 비율 다시 맞추기."></textarea></div></div>
+    <div class="rule"><span class="n">3</span><div class="b"><label for="r3">시장이 무너지면 어떻게 할까</label><textarea id="r3" rows="2" placeholder="예: 팔지 않는다. 현금 버퍼에서 꺼내 쓰고, 인출액 10% 줄인다."></textarea></div></div>
+  </section>
+
+  <section class="card sheet" id="sheet">
+    <h2 class="t">나만의 인출계획표</h2>
+    <div class="who" id="who"></div>
+
+    <div class="blk"><h3>① 담기 · 1주차 배분안</h3><div id="s1"></div></div>
+    <div class="blk"><h3>② 꺼내기 · 2주차 인출 계획</h3><div id="s2"></div></div>
+    <div class="blk"><h3>③ 버티기 · 3주차 시뮬레이션</h3><div id="s3"></div></div>
+    <div class="blk"><h3>④ 물가를 반영하면 내 생활비는</h3><div id="s4"></div></div>
+    <div class="blk"><h3>⑤ 규칙</h3><div id="s5"></div></div>
+    <div class="blk simple"><h3>나의 심플 규칙 3줄</h3><div id="s6"></div></div>
+  </section>
+
+  <div class="src">
+    <b>계산 방식</b><br>
+    · 자산에서 꺼낼 돈 = 한 달 생활비 − 다른 소득. 인출률 = 1년 치 꺼낼 돈 ÷ 은퇴자산.<br>
+    · 물가 반영표: 오늘 한 달 생활비를 같은 물가상승률로 10·20·30년 늘린 금액입니다. 2.1%는 2025년 연간 소비자물가 상승률, 2.9%는 2026년 9월 전년동월비입니다. (국가데이터처)<br>
+    · 1·2·3주차 칸은 같은 기기에서 앞의 실습도구에 저장한 값을 불러옵니다. 저장된 값이 없으면 비워 둡니다.
+  </div>
+
+  <footer>
+    <div class="brand">IdentiFi 정원준 CFP · 국가공인 신용상담사</div>
+    <div class="disc">본 계산기는 교육 목적으로 제공되며, 실제 금융 상품과 다를 수 있습니다. 정확한 판단은 전문가 상담을 통해 확인하시기 바랍니다.</div>
+  </footer>
+</div>
+
+<script>
+const KEY='retech_adv_plan_v1', K1='retech_adv_portfolio_v1', K2='retech_adv_withdraw_v1', K3='retech_adv_sim_v1';
+const ASSETS=[['ks','국내주식','#1E3A5F'],['gs','해외주식','#3b82c4'],['bd','채권','#1f8a5b'],['alt','리츠·대체·금','#F5A623'],['cash','예금·현금','#9aa5b1']];
+const INC={
+  full:['물가만큼','첫해 인출액을 해마다 물가상승률만큼 올립니다. 생활은 가장 안정적이지만 자산이 버텨 줘야 합니다.'],
+  half:['물가의 절반','해마다 물가상승률의 절반만 올립니다. 나이가 들수록 씀씀이가 줄어드는 흐름에 맞춘 방식입니다.'],
+  grd:['가드레일','물가만큼 올리되, 인출률이 처음보다 20% 넘게 높아지면 10% 줄이고 20% 넘게 낮아지면 10% 늘립니다. (2주차)']
+};
+const PF={us:'미국주식 100%','6040':'60/40',perm:'영구 포트폴리오',aw:'올웨더 (근사)',buf:'버핏 90/10',gra:'그레이엄 50/50',bo1:'보글 · 나이만큼 채권',bo2:'보글 · 120−나이 주식',my:'내 배분'};
+const $=id=>document.getElementById(id);
+const state={inc:'full'};
+const read=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } };
+function num(id){ const v=parseFloat($(id).value); return isFinite(v)?v:NaN; }
+function man(v){ v=Math.round(v); if(v<0) v=0; const e=Math.floor(v/10000), r=v%10000; return e?`${e}억`+(r?` ${r.toLocaleString()}만원`:'원'):`${r.toLocaleString()}만원`; }
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+$('chk').innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('');
+$('chk').value='3';
+$('incSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ state.inc=b.dataset.v; paint(); update(); }));
+['need','other','age','asset','r1','r2','r3'].forEach(id=>$(id).addEventListener('input',update));
+['buf','chk','cut'].forEach(id=>$(id).addEventListener('change',update));
+function paint(){
+  $('incSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.inc));
+  $('incNote').textContent=INC[state.inc][1];
+}
+
+function update(){
+  save();
+  const p1=read(K1), p2=read(K2), p3=read(K3);
+  const age=num('age'), A=num('asset'), need=num('need'), other=num('other')||0;
+  const d=new Date();
+  $('who').textContent=`작성일 ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} · IdentiFi 정원준 CFP 심화과정`;
+
+  // ① 1주차
+  let h1='<p class="empty">1주차 설계기에 저장한 값이 없습니다. 같은 기기에서 은퇴 포트폴리오 설계기를 먼저 열어 보세요.</p>';
+  if(p1&&p1.v){
+    const v=ASSETS.map(([k])=>Math.max(0,parseFloat(p1.v[k])||0)), tot=v.reduce((a,b)=>a+b,0);
+    if(tot>0){
+      const pct=v.map(x=>x/tot*100), risk=pct[0]+pct[1]+pct[3];
+      h1=`<div class="bar">${ASSETS.map(([,n,c],i)=>pct[i]>0?`<span style="width:${pct[i]}%;background:${c}"></span>`:'').join('')}</div>
+        <div class="lg">${ASSETS.map(([,n,c],i)=>pct[i]>0?`<span><i style="background:${c}"></i>${n} ${Math.round(pct[i])}%</span>`:'').join('')}</div>
+        <dl class="kv" style="margin-top:6px"><dt>위험자산 비중</dt><dd>${Math.round(risk)}%</dd>${p1.mode==='amt'?`<dt>금융자산 합계</dt><dd>${man(tot)}</dd>`:''}</dl>`;
+    }
+  }
+  $('s1').innerHTML=h1;
+
+  // ② 2주차 + 생활비
+  const take=need>0?Math.max(0,need-other):NaN, wr=A>0&&take>=0?take*12/A*100:NaN;
+  let h2=`<dl class="kv">`;
+  if(isFinite(need)) h2+=`<dt>한 달 생활비</dt><dd>${man(need)} − 다른 소득 ${man(other)} = <span style="color:var(--orange-d)">자산에서 ${man(take)}</span></dd>`;
+  if(isFinite(age)&&A>0) h2+=`<dt>시작</dt><dd>${age}세, 은퇴자산 ${man(A)}</dd>`;
+  if(isFinite(wr)) h2+=`<dt>필요한 인출률</dt><dd>${wr.toFixed(1)}%</dd>`;
+  if(p2&&p2.rate) h2+=`<dt>2주차에 정한 인출률</dt><dd>${p2.rate}%${A>0?` (한 달 약 ${man(A*p2.rate/100/12)})`:''}</dd>`;
+  h2+=`<dt>올리는 방식</dt><dd>${INC[state.inc][0]}</dd></dl>`;
+  if(isFinite(wr)) h2+= wr>5 ? `<p class="gapmsg"><b>필요한 인출률 ${wr.toFixed(1)}%</b>는 100년 성적표에서 버틴 경우가 크게 줄어드는 수준입니다. 생활비, 다른 소득, 은퇴 시점 중 하나를 조정할 여지가 있는지 보세요.</p>`
+                      : wr>4 ? `<p class="gapmsg">필요한 인출률 ${wr.toFixed(1)}%. 4%를 조금 넘습니다. 가드레일이나 줄이는 규칙을 꼭 함께 두세요.</p>`
+                      : `<p class="gapmsg"><b class="ok">필요한 인출률 ${wr.toFixed(1)}%</b>. 역사적으로 버틴 경우가 많은 범위입니다.</p>`;
+  if(!isFinite(need)&&!(p2&&p2.rate)) h2='<p class="empty">위 1번에 생활비와 다른 소득을 적으면 채워집니다.</p>';
+  $('s2').innerHTML=h2;
+
+  // ③ 3주차
+  let h3='<p class="empty">3주차 은퇴 연도 시뮬레이터에 저장한 값이 없습니다.</p>';
+  if(p3&&p3.picks&&p3.picks.length){
+    h3=`<dl class="kv"><dt>비교한 포트폴리오</dt><dd>${p3.picks.map(k=>PF[k]||k).join(', ')}</dd>
+      <dt>마지막으로 본 은퇴 연도</dt><dd>${p3.start}년 · 인출률 ${p3.rate||'-'}% · ${p3.yrs}년</dd></dl>
+      <p class="note">2000년처럼 은퇴 직후 하락이 오면 같은 포트폴리오도 결과가 크게 달라졌습니다. 아래 ⑤의 규칙이 그때를 위한 것입니다.</p>`;
+  }
+  $('s3').innerHTML=h3;
+
+  // ④ 물가
+  const base=take>0?take:(need>0?need:NaN);
+  if(isFinite(base)){
+    const row=r=>[10,20,30].map(y=>`<td>${Math.round(base*Math.pow(1+r,y)).toLocaleString()}</td>`).join('');
+    $('s4').innerHTML=`<table class="tb"><tr><th>물가상승률</th><th>10년 뒤</th><th>20년 뒤</th><th>30년 뒤</th></tr>
+      <tr><td>연 2.1%</td>${row(.021)}</tr><tr><td>연 2.9%</td>${row(.029)}</tr></table>
+      <p class="note">단위 만원. 오늘 ${take>0?'자산에서 꺼낼':'한 달 생활비'} ${man(base)}과 같은 생활을 하려면 필요한 한 달 금액입니다.${state.inc==='half'?' 물가의 절반만 올리기로 했다면 이 금액보다 덜 꺼내게 됩니다.':''}</p>`;
+  } else $('s4').innerHTML='<p class="empty">생활비를 적으면 채워집니다.</p>';
+
+  // ⑤ 규칙
+  const bufN=+$('buf').value, cutT=$('cut').selectedOptions[0].textContent;
+  $('s5').innerHTML=`<dl class="kv"><dt>현금 버퍼</dt><dd>${bufN?`${bufN}년 치${isFinite(take)&&take>0?` (약 ${man(take*12*bufN)})`:''}`:'두지 않음'}</dd>
+    <dt>점검일</dt><dd>매년 ${$('chk').value}월, 1년에 한 번</dd><dt>줄이는 규칙</dt><dd>${esc(cutT)}</dd></dl>`;
+
+  // ⑥ 심플 규칙
+  const rs=['r1','r2','r3'].map(id=>$(id).value.trim());
+  $('s6').innerHTML=rs.some(Boolean)?`<ol>${rs.map((t,i)=>`<li>${t?esc(t):'<span class="empty">(비어 있음)</span>'}</li>`).join('')}</ol>`:'<p class="empty">위 3번에 세 줄을 적으면 여기에 담깁니다.</p>';
+}
+
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify({inc:state.inc,need:$('need').value,other:$('other').value,age:$('age').value,asset:$('asset').value,buf:$('buf').value,chk:$('chk').value,cut:$('cut').value,r1:$('r1').value,r2:$('r2').value,r3:$('r3').value})); }catch(e){}
+}
+function load(){
+  const s=read(KEY);
+  if(s){
+    state.inc=s.inc||'full';
+    ['need','other','age','asset','buf','chk','cut','r1','r2','r3'].forEach(k=>{ if(s[k]!==undefined&&s[k]!=='') $(k).value=s[k]; });
+    return;
+  }
+  const msgs=[], p2=read(K2), p3=read(K3), p1=read(K1);
+  const src=p3||p2;
+  if(src){ if(src.age) $('age').value=src.age; if(src.asset) $('asset').value=src.asset; }
+  if(p1) msgs.push('1주차'); if(p2) msgs.push('2주차'); if(p3) msgs.push('3주차 시뮬레이터');
+  if(msgs.length) $('loadNote').textContent=msgs.join(', ')+'에 저장한 값을 불러왔습니다. 값은 이 기기에만 저장됩니다.';
+}
+$('btnPrint').addEventListener('click',()=>window.print());
+$('btnSample').addEventListener('click',()=>{
+  $('need').value=300; $('other').value=130; $('age').value=60; $('asset').value=50000; $('buf').value='2'; $('chk').value='3'; $('cut').value='a';
+  $('r1').value='주식 인덱스펀드 50, 채권형 40, 현금 10. 펀드는 세 개만.';
+  $('r2').value='매달 170만원. 매년 3월에 한 번만 비율 다시 맞추기.';
+  $('r3').value='팔지 않는다. 현금 버퍼에서 꺼내 쓰고, 인출액 10% 줄인다.';
+  state.inc='grd'; paint(); update();
+});
+$('btnReset').addEventListener('click',()=>{
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  ['need','other','age','asset','r1','r2','r3'].forEach(k=>$(k).value='');
+  $('buf').value='2'; $('chk').value='3'; $('cut').value='a'; state.inc='full';
+  load(); paint(); update();
+});
+load(); paint(); update();
+</script>
+</body>
+</html>
